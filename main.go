@@ -32,10 +32,10 @@ func main() {
 	r := gin.Default()
 	r.POST("/v1/posts", CreateNewPost)
 	r.GET("/v1/posts", GetAllPosts) // HL
-	r.GET("/v1/posts/:post_id", GetPost)
-	r.PUT("/v1/posts/:post_id", UpdatePost)
-	r.PATCH("/v1/posts/:post_id", UpdatePost)
-	r.DELETE("/v1/posts/:post_id", DeletePost)
+	r.GET("/v1/posts/:id_post", GetPost)
+	r.PUT("/v1/posts/:id_post", UpdatePost)
+	r.PATCH("/v1/posts/:id_post", UpdatePost)
+	r.DELETE("/v1/posts/:id_post", DeletePost)
 	r.Run(":8080")
 }
 
@@ -60,9 +60,10 @@ func GetAllPosts(c *gin.Context) {
 }
 
 func GetPost(c *gin.Context) {
-	id := c.Params.ByName("id")
+	id_post := c.Params.ByName("id_post")
+	fmt.Println(id_post)
 	var post Post
-	if err := db.Where("id = ?", id).First(&post).Error; err != nil {
+	if err := db.Where("id_post = ?", id_post).First(&post).Error; err != nil {
 		c.AbortWithStatus(404)
 		fmt.Println(err)
 	} else {
@@ -72,8 +73,8 @@ func GetPost(c *gin.Context) {
 
 func UpdatePost(c *gin.Context) {
 	var post Post
-	id := c.Params.ByName("id")
-	if err := db.Where("id = ?", id).First(&post).Error; err != nil {
+	id_post := c.Params.ByName("id_post")
+	if err := db.Where("id_post = ?", id_post).First(&post).Error; err != nil {
 		c.AbortWithStatus(404)
 		fmt.Println(err)
 	}
@@ -83,9 +84,9 @@ func UpdatePost(c *gin.Context) {
 }
 
 func DeletePost(c *gin.Context) {
-	id := c.Params.ByName("id")
+	id_post := c.Params.ByName("id_post")
 	var post Post
-	d := db.Where("id = ?", id).Delete(&post)
+	d := db.Where("id_post = ?", id_post).Delete(&post)
 	fmt.Println(d)
-	c.JSON(200, gin.H{"id #" + id: "deleted"})
+	c.JSON(200, gin.H{"id_post #" + id_post: "deleted"})
 }
