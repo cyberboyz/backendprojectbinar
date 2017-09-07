@@ -10,10 +10,13 @@ import (
 var db *gorm.DB
 var err error
 
-type Food struct {
-	ID        uint   `json:"id"`
-	FoodName string `json:"foodname"`
-	Price  uint `json:"price"`
+type Post struct {
+	IDPost       uint   `json:"id_post"`
+	IDUser       uint   `json:"id_user"`
+	IDBackground uint   `json:"id_background"`
+	PostTitle    string `json:"post_title"`
+	Categories   string `json:"categories"`
+	Content      string `json:"content"`
 }
 
 // START OMIT
@@ -24,65 +27,65 @@ func main() {
 		fmt.Println(err)
 	}
 	defer db.Close()
-	db.AutoMigrate(&Food{})
+	db.AutoMigrate(&Post{})
 
 	r := gin.Default()
-	r.GET("/v1/food", GetAllFood) // HL
-	r.GET("/v1/food/:id", GetFood)
-	r.POST("/v1/food", CreateFood)
-	r.PUT("/v1/food/:id", UpdateFood)
-	r.PATCH("/v1/food/:id", UpdateFood)
-	r.DELETE("/v1/food/:id", DeleteFood)
+	r.POST("/v1/posts", CreateNewPost)
+	r.GET("/v1/posts", GetAllPosts) // HL
+	r.GET("/v1/posts/:post_id", GetPost)
+	r.PUT("/v1/posts/:post_id", UpdatePost)
+	r.PATCH("/v1/posts/:post_id", UpdatePost)
+	r.DELETE("/v1/posts/:post_id", DeletePost)
 	r.Run(":8080")
 }
 
 // END OMIT
 
-func DeleteFood(c *gin.Context) {
+func CreateNewPost(c *gin.Context) {
+	var post Post
+	c.BindJSON(&post)
+	db.Create(&post)
+	c.JSON(200, post)
+}
+
+func GetAllPosts(c *gin.Context) {
+	var someposts []Post
+	if err := db.Find(&someposts).Error; err != nil {
+		c.AbortWithStatus(404)
+		fmt.Println(err)
+	} else {
+		c.JSON(200, someposts)
+	}
+
+}
+
+func GetPost(c *gin.Context) {
 	id := c.Params.ByName("id")
-	var food Food
-	d := db.Where("id = ?", id).Delete(&food)
+	var post Post
+	if err := db.Where("id = ?", id).First(&post).Error; err != nil {
+		c.AbortWithStatus(404)
+		fmt.Println(err)
+	} else {
+		c.JSON(200, post)
+	}
+}
+
+func UpdatePost(c *gin.Context) {
+	var post Post
+	id := c.Params.ByName("id")
+	if err := db.Where("id = ?", id).First(&post).Error; err != nil {
+		c.AbortWithStatus(404)
+		fmt.Println(err)
+	}
+	c.BindJSON(&post)
+	db.Save(&post)
+	c.JSON(200, post)
+}
+
+func DeletePost(c *gin.Context) {
+	id := c.Params.ByName("id")
+	var post Post
+	d := db.Where("id = ?", id).Delete(&post)
 	fmt.Println(d)
 	c.JSON(200, gin.H{"id #" + id: "deleted"})
-}
-
-func UpdateFood(c *gin.Context) {
-	var food Food
-	id := c.Params.ByName("id")
-	if err := db.Where("id = ?", id).First(&food).Error; err != nil {
-		c.AbortWithStatus(404)
-		fmt.Println(err)
-	}
-	c.BindJSON(&food)
-	db.Save(&food)
-	c.JSON(200, food)
-}
-
-func CreateFood(c *gin.Context) {
-	var food Food
-	c.BindJSON(&food)
-	db.Create(&food)
-	c.JSON(200, food)
-}
-
-func GetFood(c *gin.Context) {
-	id := c.Params.ByName("id")
-	var food Food
-	if err := db.Where("id = ?", id).First(&food).Error; err != nil {
-		c.AbortWithStatus(404)
-		fmt.Println(err)
-	} else {
-		c.JSON(200, food)
-	}
-}
-
-func GetAllFood(c *gin.Context) {
-	var somefood []Food
-	if err := db.Find(&somefood).Error; err != nil {
-		c.AbortWithStatus(404)
-		fmt.Println(err)
-	} else {
-		c.JSON(200, somefood)
-	}
-
 }
