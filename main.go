@@ -86,7 +86,7 @@ var db *gorm.DB
 var err error
 
 func main() {
-	db, err = gorm.Open("postgres", "host=ec2-50-17-236-15.compute-1.amazonaws.com user=ssvuoibpdkugsp dbname=dso2rra5vg6aa password=c73e9d4dfbc63b197d4c2336c77adcc4d974afccf584f8a5e793d1e7ac90d242")
+	db, err = gorm.Open("postgres", "host=ec2-50-17-236-15.compute-1.amazonaws.com user=ssvuoibpdkugsp dbname=dso2rra5vg6aa sslmode=disable password=c73e9d4dfbc63b197d4c2336c77adcc4d974afccf584f8a5e793d1e7ac90d242")
 	db.SingularTable(true)
 	if err != nil {
 		fmt.Println(err)
