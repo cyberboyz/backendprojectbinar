@@ -105,6 +105,7 @@ func main() {
 			usergroup.PUT("/:id", UserUpdate)
 			usergroup.PATCH("/:id", UserUpdate)
 			usergroup.DELETE("/:id", UserDelete)
+			// usergroup.GET("/posts", UserPostsGet)
 		}
 		bookmark := v1.Group("/bookmarks")
 		{
@@ -241,8 +242,6 @@ func UserGet(c *gin.Context) {
 
 func UserDetail(c *gin.Context) {
 	authorization := c.Request.Header.Get("Authorization")
-	fmt.Println("Harusnya ini keluar yaaa")
-	fmt.Println(authorization)
 	if authorization != "2n41jt01fk1-cj2190c129je211x910s19k112i012d" {
 		response := &ResponseUser{
 			Message: "Unauthorized access",
@@ -285,8 +284,6 @@ func UserDetail(c *gin.Context) {
 
 func UserCreate(c *gin.Context) {
 	authorization := c.Request.Header.Get("Authorization")
-	fmt.Println("Harusnya ini keluar yaaa")
-	fmt.Println(authorization)
 	if authorization != "2n41jt01fk1-cj2190c129je211x910s19k112i012d" {
 		response := &ResponseUser{
 			Message: "Unauthorized access",
@@ -328,8 +325,6 @@ func UserCreate(c *gin.Context) {
 
 func UserUpdate(c *gin.Context) {
 	authorization := c.Request.Header.Get("Authorization")
-	fmt.Println("Harusnya ini keluar yaaa")
-	fmt.Println(authorization)
 	if authorization != "2n41jt01fk1-cj2190c129je211x910s19k112i012d" {
 		response := &ResponseUser{
 			Message: "Unauthorized access",
@@ -384,8 +379,6 @@ func UserUpdate(c *gin.Context) {
 
 func UserDelete(c *gin.Context) {
 	authorization := c.Request.Header.Get("Authorization")
-	fmt.Println("Harusnya ini keluar yaaa")
-	fmt.Println(authorization)
 	if authorization != "2n41jt01fk1-cj2190c129je211x910s19k112i012d" {
 		response := &ResponseUser{
 			Message: "Unauthorized access",
@@ -426,8 +419,6 @@ func UserDelete(c *gin.Context) {
 
 func BookmarkCreate(c *gin.Context) {
 	authorization := c.Request.Header.Get("Authorization")
-	fmt.Println("Harusnya ini keluar yaaa")
-	fmt.Println(authorization)
 	if authorization != "2n41jt01fk1-cj2190c129je211x910s19k112i012d" {
 		response := &ResponseUser{
 			Message: "Unauthorized access",
@@ -469,8 +460,6 @@ func BookmarkCreate(c *gin.Context) {
 
 func BookmarkGet(c *gin.Context) {
 	authorization := c.Request.Header.Get("Authorization")
-	fmt.Println("Harusnya ini keluar yaaa")
-	fmt.Println(authorization)
 	if authorization != "2n41jt01fk1-cj2190c129je211x910s19k112i012d" {
 		response := &ResponseUser{
 			Message: "Unauthorized access",
@@ -502,8 +491,6 @@ func BookmarkGet(c *gin.Context) {
 
 func BookmarkDelete(c *gin.Context) {
 	authorization := c.Request.Header.Get("Authorization")
-	fmt.Println("Harusnya ini keluar yaaa")
-	fmt.Println(authorization)
 	if authorization != "2n41jt01fk1-cj2190c129je211x910s19k112i012d" {
 		response := &ResponseUser{
 			Message: "Unauthorized access",
@@ -544,8 +531,6 @@ func BookmarkDelete(c *gin.Context) {
 
 func PostGet(c *gin.Context) {
 	authorization := c.Request.Header.Get("Authorization")
-	fmt.Println("Harusnya ini keluar yaaa")
-	fmt.Println(authorization)
 	if authorization != "2n41jt01fk1-cj2190c129je211x910s19k112i012d" {
 		response := &ResponseUser{
 			Message: "Unauthorized access",
@@ -576,8 +561,6 @@ func PostGet(c *gin.Context) {
 
 func PostDetail(c *gin.Context) {
 	authorization := c.Request.Header.Get("Authorization")
-	fmt.Println("Harusnya ini keluar yaaa")
-	fmt.Println(authorization)
 	if authorization != "2n41jt01fk1-cj2190c129je211x910s19k112i012d" {
 		response := &ResponseUser{
 			Message: "Unauthorized access",
@@ -621,8 +604,6 @@ func PostDetail(c *gin.Context) {
 
 func PostCreate(c *gin.Context) {
 	authorization := c.Request.Header.Get("Authorization")
-	fmt.Println("Harusnya ini keluar yaaa")
-	fmt.Println(authorization)
 	if authorization != "2n41jt01fk1-cj2190c129je211x910s19k112i012d" {
 		response := &ResponseUser{
 			Message: "Unauthorized access",
@@ -665,8 +646,6 @@ func PostCreate(c *gin.Context) {
 
 func PostUpdate(c *gin.Context) {
 	authorization := c.Request.Header.Get("Authorization")
-	fmt.Println("Harusnya ini keluar yaaa")
-	fmt.Println(authorization)
 	if authorization != "2n41jt01fk1-cj2190c129je211x910s19k112i012d" {
 		response := &ResponseUser{
 			Message: "Unauthorized access",
@@ -722,8 +701,6 @@ func PostUpdate(c *gin.Context) {
 
 func PostDelete(c *gin.Context) {
 	authorization := c.Request.Header.Get("Authorization")
-	fmt.Println("Harusnya ini keluar yaaa")
-	fmt.Println(authorization)
 	if authorization != "2n41jt01fk1-cj2190c129je211x910s19k112i012d" {
 		response := &ResponseUser{
 			Message: "Unauthorized access",
@@ -764,8 +741,6 @@ func PostDelete(c *gin.Context) {
 
 func CategoryCreate(c *gin.Context) {
 	authorization := c.Request.Header.Get("Authorization")
-	fmt.Println("Harusnya ini keluar yaaa")
-	fmt.Println(authorization)
 	if authorization != "2n41jt01fk1-cj2190c129je211x910s19k112i012d" {
 		response := &ResponseUser{
 			Message: "Unauthorized access",
@@ -807,8 +782,6 @@ func CategoryCreate(c *gin.Context) {
 
 func CategoryGet(c *gin.Context) {
 	authorization := c.Request.Header.Get("Authorization")
-	fmt.Println("Harusnya ini keluar yaaa")
-	fmt.Println(authorization)
 	if authorization != "2n41jt01fk1-cj2190c129je211x910s19k112i012d" {
 		response := &ResponseUser{
 			Message: "Unauthorized access",
@@ -840,8 +813,6 @@ func CategoryGet(c *gin.Context) {
 
 func CategoryPostsList(c *gin.Context) {
 	authorization := c.Request.Header.Get("Authorization")
-	fmt.Println("Harusnya ini keluar yaaa")
-	fmt.Println(authorization)
 	if authorization != "2n41jt01fk1-cj2190c129je211x910s19k112i012d" {
 		response := &ResponseUser{
 			Message: "Unauthorized access",
@@ -872,3 +843,34 @@ func CategoryPostsList(c *gin.Context) {
 
 	c.JSON(http.StatusOK, response)
 }
+
+// func UserPostsGet(c *gin.Context) {
+// 	authorization := c.Request.Header.Get("Authorization")
+// 	if authorization != "2n41jt01fk1-cj2190c129je211x910s19k112i012d" {
+// 		response := &ResponseUser{
+// 			Message: "Unauthorized access",
+// 		}
+// 		c.JSON(http.StatusUnauthorized, response)
+// 		c.Abort()
+// 		return
+// 	}
+
+// 	posts := []*Posts{}
+
+// 	err = db.Where("id = ?", posts.).Find(&posts).Error
+
+// 	if err != nil {
+// 		response := &ResponsePost{
+// 			Message: err.Error(),
+// 		}
+// 		c.JSON(http.StatusServiceUnavailable, response)
+// 		c.Abort()
+// 		return
+// 	}
+
+// 	response := &ResponsePost{
+// 		posts, "Get posts", SuccessStatus{true, 200},
+// 	}
+
+// 	c.JSON(http.StatusOK, response)
+// }
