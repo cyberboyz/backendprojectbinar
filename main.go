@@ -91,10 +91,11 @@ func main() {
 
 	if port == "" {
 		fmt.Println("$PORT must be set")
+		port = "8080"
 	}
 
-	// db, err = gorm.Open("postgres", "host=localhost user=postgres dbname=gorm sslmode=disable password=postgres")
-	db, err = gorm.Open("postgres", "postgres://ssvuoibpdkugsp:c73e9d4dfbc63b197d4c2336c77adcc4d974afccf584f8a5e793d1e7ac90d242@ec2-50-17-236-15.compute-1.amazonaws.com:5432/dso2rra5vg6aa")
+	db, err = gorm.Open("postgres", "host=localhost user=postgres dbname=gorm sslmode=disable password=postgres")
+	// db, err = gorm.Open("postgres", "postgres://ssvuoibpdkugsp:c73e9d4dfbc63b197d4c2336c77adcc4d974afccf584f8a5e793d1e7ac90d242@ec2-50-17-236-15.compute-1.amazonaws.com:5432/dso2rra5vg6aa")
 
 	db.SingularTable(true)
 	if err != nil {
