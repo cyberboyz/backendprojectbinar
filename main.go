@@ -87,7 +87,6 @@ var db *gorm.DB
 var err error
 
 func main() {
-	gin.SetMode(gin.ReleaseMode)
 	port := os.Getenv("PORT")
 
 	if port == "" {
@@ -206,30 +205,20 @@ func LogoutUser(c *gin.Context) {
 		"success": true, "status_code": http.StatusOK})
 }
 
-func Authorize(c *gin.Context) {
-	// fmt.Println(c)
+func AuthorizeMiddleware(c *gin.Context) {
 	authorization := c.Request.Header.Get("Authorization")
 	if authorization != "2n41jt01fk1-cj2190c129je211x910s19k112i012d" {
 		response := &ResponseUser{
 			Message: "Unauthorized access",
 		}
 		c.JSON(http.StatusUnauthorized, response)
-		c.Abort()
-		return
+		c.Next()
 	}
 }
 
 func UserGet(c *gin.Context) {
 
-	authorization := c.Request.Header.Get("Authorization")
-	if authorization != "2n41jt01fk1-cj2190c129je211x910s19k112i012d" {
-		response := &ResponseUser{
-			Message: "Unauthorized access",
-		}
-		c.JSON(http.StatusUnauthorized, response)
-		c.Abort()
-		return
-	}
+	AuthorizeMiddleware(c)
 
 	users := []*Users{}
 	err = db.Find(&users).Error
@@ -252,15 +241,8 @@ func UserGet(c *gin.Context) {
 }
 
 func UserDetail(c *gin.Context) {
-	authorization := c.Request.Header.Get("Authorization")
-	if authorization != "2n41jt01fk1-cj2190c129je211x910s19k112i012d" {
-		response := &ResponseUser{
-			Message: "Unauthorized access",
-		}
-		c.JSON(http.StatusUnauthorized, response)
-		c.Abort()
-		return
-	}
+
+	AuthorizeMiddleware(c)
 
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
@@ -294,15 +276,8 @@ func UserDetail(c *gin.Context) {
 }
 
 func UserCreate(c *gin.Context) {
-	authorization := c.Request.Header.Get("Authorization")
-	if authorization != "2n41jt01fk1-cj2190c129je211x910s19k112i012d" {
-		response := &ResponseUser{
-			Message: "Unauthorized access",
-		}
-		c.JSON(http.StatusUnauthorized, response)
-		c.Abort()
-		return
-	}
+
+	AuthorizeMiddleware(c)
 
 	user := &Users{}
 	err := c.BindJSON(&user)
@@ -335,15 +310,8 @@ func UserCreate(c *gin.Context) {
 }
 
 func UserUpdate(c *gin.Context) {
-	authorization := c.Request.Header.Get("Authorization")
-	if authorization != "2n41jt01fk1-cj2190c129je211x910s19k112i012d" {
-		response := &ResponseUser{
-			Message: "Unauthorized access",
-		}
-		c.JSON(http.StatusUnauthorized, response)
-		c.Abort()
-		return
-	}
+
+	AuthorizeMiddleware(c)
 
 	idStr := c.Param("id")
 	id64, err := strconv.ParseUint(idStr, 10, 64)
@@ -389,15 +357,8 @@ func UserUpdate(c *gin.Context) {
 }
 
 func UserDelete(c *gin.Context) {
-	authorization := c.Request.Header.Get("Authorization")
-	if authorization != "2n41jt01fk1-cj2190c129je211x910s19k112i012d" {
-		response := &ResponseUser{
-			Message: "Unauthorized access",
-		}
-		c.JSON(http.StatusUnauthorized, response)
-		c.Abort()
-		return
-	}
+
+	AuthorizeMiddleware(c)
 
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
