@@ -91,6 +91,8 @@ func main() {
 	// db, err = gorm.Open("postgres", "host=localhost user=postgres dbname=gorm sslmode=disable password=postgres")
 	db, err = gorm.Open("postgres", os.Getenv("DATABASE_URL"))
 
+	
+
 	db.SingularTable(true)
 	if err != nil {
 		fmt.Println(err)
