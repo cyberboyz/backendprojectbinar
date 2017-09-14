@@ -1,1 +1,1 @@
-web: backendprojectbinar
+web: bin/dreamcatcher
