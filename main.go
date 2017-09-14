@@ -88,10 +88,12 @@ var err error
 
 func main() {
 
+	port := os.Getenv("PORT")
+
 	// db, err = gorm.Open("postgres", "host=localhost user=postgres dbname=gorm sslmode=disable password=postgres")
 	db, err = gorm.Open("postgres", os.Getenv("DATABASE_URL"))
 
-	
+
 
 	db.SingularTable(true)
 	if err != nil {
@@ -138,7 +140,7 @@ func main() {
 		v1.POST("/register/", RegisterUser)
 		v1.POST("/logout/", LogoutUser)
 	}
-	router.Run(":8080")
+	router.Run(":" + port)
 }
 
 func RegisterUser(c *gin.Context) {
