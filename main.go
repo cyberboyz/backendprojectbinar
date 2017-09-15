@@ -99,6 +99,7 @@ func main() {
 	if port == "" {
 		port = "8080"
 	}
+	fmt.Println(port)
 
 	db_url := os.Getenv("DATABASE_URL")
 	if db_url == "" {
