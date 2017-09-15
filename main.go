@@ -9,6 +9,7 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
+	"regexp"
 	"strconv"
 	"time"
 )
@@ -99,7 +100,6 @@ func main() {
 	if port == "" {
 		port = "8080"
 	}
-	fmt.Println(port)
 
 	db_url := os.Getenv("DATABASE_URL")
 	if db_url == "" {
@@ -109,6 +109,7 @@ func main() {
 	db, err = gorm.Open("postgres", db_url)
 
 	db.SingularTable(true)
+
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -167,6 +168,15 @@ func AuthorizeMiddleware(c *gin.Context) {
 	authorization := c.Request.Header.Get("Authorization")
 	auth := &Users{}
 
+	if authorization == "" {
+		response := &ResponseUser{
+			Message: "Cannot access the resource : You need to authenticate",
+		}
+		c.JSON(http.StatusUnauthorized, response)
+		c.Abort()
+		return
+	}
+
 	err = db.Where("token = ? ", authorization).Find(&auth).Error
 
 	if err != nil {
@@ -178,6 +188,14 @@ func AuthorizeMiddleware(c *gin.Context) {
 		return
 	}
 	c.Next()
+}
+
+func ValidateFormatEmail(email string) string {
+	emailRegexp := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
+	if !emailRegexp.MatchString(email) {
+		return "Error : Email is not correct"
+	}
+	return ""
 }
 
 func RegisterUser(c *gin.Context) {
@@ -202,6 +220,17 @@ func RegisterUser(c *gin.Context) {
 		return
 	}
 
+	validation := ValidateFormatEmail(register.Email)
+
+	if validation != "" {
+		response := &ResponseAuth{
+			Message: validation,
+		}
+		c.JSON(http.StatusBadRequest, response)
+		c.Abort()
+		return
+	}
+
 	if register.Password == "" {
 		response := &ResponseAuth{
 			Message: "Error : Password cannot be empty",
@@ -210,7 +239,7 @@ func RegisterUser(c *gin.Context) {
 		c.Abort()
 		return
 	}
-	fmt.Println(register.Password)
+
 	hash, _ := bcrypt.GenerateFromPassword([]byte(register.Password), bcrypt.DefaultCost)
 	register.Password = string(hash)
 
@@ -271,6 +300,13 @@ func LoginUser(c *gin.Context) {
 }
 
 func LogoutUser(c *gin.Context) {
+	logout := &Users{}
+
+	authorization := c.Request.Header.Get("Authorization")
+	fmt.Println(authorization)
+
+	db.Model(logout).Update("token", logout.Token).Where("token", authorization)
+
 	c.JSON(http.StatusOK, gin.H{"message": "Logout successful",
 		"success": true, "status_code": http.StatusOK})
 }
