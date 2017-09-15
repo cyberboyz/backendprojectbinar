@@ -11,6 +11,7 @@ import (
 	"os"
 	"regexp"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -230,6 +231,8 @@ func RegisterUser(c *gin.Context) {
 		c.Abort()
 		return
 	}
+
+	register.Email = strings.ToLower(register.Email)
 
 	if register.Password == "" {
 		response := &ResponseAuth{
