@@ -165,7 +165,11 @@ func main() {
 
 func AuthorizeMiddleware(c *gin.Context) {
 	authorization := c.Request.Header.Get("Authorization")
-	if authorization != "2n41jt01fk1-cj2190c129je211x910s19k112i012d" {
+	auth := &Users{}
+
+	err = db.Where("token = ? ", authorization).Find(&auth).Error
+
+	if err != nil {
 		response := &ResponseUser{
 			Message: "Unauthorized access",
 		}
@@ -246,7 +250,6 @@ func LoginUser(c *gin.Context) {
 	inputPassword := login.Password
 
 	db.Where("email = ? ", login.Email).Find(&login)
-	fmt.Println(login.Token)
 
 	err = bcrypt.CompareHashAndPassword([]byte(login.Password), []byte(inputPassword))
 
