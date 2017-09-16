@@ -16,7 +16,7 @@ import (
 )
 
 type Users struct {
-	ID           uint      `gorm:"primary_key" json:"id_user"`
+	ID           uint      `gorm:"primary_key;AUTO_INCREMENT" json:"id_user"`
 	Email        string    `gorm:"unique_index" json:"email"`
 	Name         string    `json:"name"`
 	Address      string    `json:"address"`
@@ -40,7 +40,7 @@ type Categories struct {
 }
 
 type Posts struct {
-	ID           uint      `gorm:"primary_key" json:"id_post"`
+	ID           uint      `gorm:"primary_key;AUTO_INCREMENT" json:"id_post"`
 	IDUser       uint      `json:"id_user"`
 	IDBackground uint      `json:"id_background"`
 	PostTitle    string    `json:"post_title"`
@@ -88,6 +88,13 @@ type ResponsePost struct {
 	SuccessStatus
 }
 
+type ResponseDetailPost struct {
+	Posts   interface{} `json:"posts, omitempty"`
+	Message string      `json:"message"`
+	SuccessStatus
+	EditMode bool `json:"edit_mode"`
+}
+
 type ResponseCategory struct {
 	Categories interface{} `json:"categories, omitempty"`
 	Message    string      `json:"message"`
@@ -106,7 +113,7 @@ func main() {
 	if db_url == "" {
 		db_url = "host=localhost user=postgres dbname=gorm sslmode=disable password=postgres"
 	}
-	// db, err = gorm.Open("postgres", "host=localhost user=postgres dbname=gorm sslmode=disable password=postgres")
+
 	db, err = gorm.Open("postgres", db_url)
 
 	db.SingularTable(true)
@@ -280,6 +287,7 @@ func LoginUser(c *gin.Context) {
 
 	err = c.BindJSON(&login)
 	inputPassword := login.Password
+	login.Email = strings.ToLower(login.Email)
 
 	db.Where("email = ? ", login.Email).Find(&login)
 
@@ -306,9 +314,8 @@ func LogoutUser(c *gin.Context) {
 	logout := &Users{}
 
 	authorization := c.Request.Header.Get("Authorization")
-	fmt.Println(authorization)
 
-	db.Model(logout).Update("token", logout.Token).Where("token", authorization)
+	db.Model(logout).Update("token", "").Where("token", authorization)
 
 	c.JSON(http.StatusOK, gin.H{"message": "Logout successful",
 		"success": true, "status_code": http.StatusOK})
@@ -565,7 +572,7 @@ func BookmarkDelete(c *gin.Context) {
 func PostGet(c *gin.Context) {
 
 	posts := []*Posts{}
-	err = db.Find(&posts).Error
+	err = db.Order("created_at desc").Find(&posts).Error
 
 	if err != nil {
 		response := &ResponsePost{
@@ -596,6 +603,11 @@ func PostDetail(c *gin.Context) {
 		return
 	}
 
+	authorization := c.Request.Header.Get("Authorization")
+	auth := &Users{}
+
+	err = db.Where("token = ? ", authorization).Find(&auth).Error
+
 	post := &Posts{}
 	err = db.Where("id = ?", id).First(&post).Error
 
@@ -608,10 +620,16 @@ func PostDetail(c *gin.Context) {
 		return
 	}
 
-	response := &ResponsePost{
+	editMode := false
+	if auth.ID == post.IDUser {
+		editMode = true
+	}
+
+	response := &ResponseDetailPost{
 		post,
 		"Post has been obtained",
 		SuccessStatus{true, 200},
+		editMode,
 	}
 
 	c.JSON(http.StatusOK, response)
@@ -786,7 +804,7 @@ func CategoryPostsList(c *gin.Context) {
 	id := c.Param("id")
 
 	posts := []*Posts{}
-	err = db.Where("categories = ?", id).Find(&posts).Error
+	err = db.Order("created_at desc").Where("categories = ?", id).Find(&posts).Error
 
 	if err != nil {
 		response := &ResponsePost{
