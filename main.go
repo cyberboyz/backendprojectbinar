@@ -648,6 +648,12 @@ func PostCreate(c *gin.Context) {
 		return
 	}
 
+	authorization := c.Request.Header.Get("Authorization")
+	auth := &Users{}
+	err = db.Where("token = ? ", authorization).Find(&auth).Error
+
+	post.IDUser = auth.ID
+
 	err = db.Create(post).Error
 
 	if err != nil {
