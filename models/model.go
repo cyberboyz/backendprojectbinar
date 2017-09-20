@@ -60,8 +60,6 @@ type Categories struct {
 
 type Posts struct {
 	ID           uint      `gorm:"primary_key" json:"id_post"`
-	Name         string    `json:"name"`
-	Email        string    `gorm:"unique_index" json:"email"`
 	IDUser       uint      `json:"id_user"`
 	Address      string    `json:"address"`
 	IDAvatar     int       `json:"id_avatar"`
