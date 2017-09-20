@@ -1,6 +1,7 @@
 package main
 
 import (
+	m "baru-dreamcatcher/models"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
@@ -27,7 +28,7 @@ type SuccessStatus struct {
 
 type ResponseUsersSignUp struct {
 	ID    uint   `gorm:"primary_key" json:"id_user"`
-	Email string `gorm:"unique_index" json:"email"`
+	Email string `json:"email"`
 	Name  string `json:"name"`
 }
 
@@ -56,7 +57,7 @@ type Status struct {
 }
 
 type Login struct {
-	Email    string `gorm:"unique_index" json:"email"`
+	Email    string `json:"email"`
 	Password string `json:"password"`
 }
 
@@ -67,8 +68,6 @@ type Categories struct {
 
 type Posts struct {
 	ID           uint      `gorm:"primary_key" json:"id_post"`
-	Name         string    `json:"name"`
-	Email        string    `gorm:"unique_index" json:"email"`
 	IDUser       uint      `json:"id_user"`
 	Address      string    `json:"address"`
 	IDAvatar     int       `json:"id_avatar"`
@@ -150,7 +149,8 @@ func main() {
 		fmt.Println(err)
 	}
 
-	db.AutoMigrate(&Users{}, &Bookmarks{}, &Posts{}, &Categories{})
+	db.DropTable("users", "bookmarks", "posts", "categories")
+	db.AutoMigrate(&m.Users{}, &m.Bookmarks{}, &m.Posts{}, &m.Categories{})
 
 	router := gin.New()
 
@@ -212,7 +212,7 @@ func AuthorizeMiddleware(c *gin.Context) {
 	auth := &Users{}
 
 	if authorization == "" {
-		response := &ResponseUser{
+		response := &m.ResponseUser{
 			Message: "Cannot access the resource : You need to authenticate",
 		}
 		c.JSON(http.StatusUnauthorized, response)
@@ -223,7 +223,7 @@ func AuthorizeMiddleware(c *gin.Context) {
 	err = db.Where("token = ? ", authorization).Find(&auth).Error
 
 	if err != nil {
-		response := &ResponseUser{
+		response := &m.ResponseUser{
 			Message: "Unauthorized access",
 		}
 		c.JSON(http.StatusUnauthorized, response)
@@ -370,13 +370,13 @@ func LoginUser(c *gin.Context) {
 }
 
 func LogoutUser(c *gin.Context) {
-	logout := &Users{}
+	logout := &m.Users{}
 
 	authorization := c.Request.Header.Get("Authorization")
 
 	db.Model(logout).Update("token", logout.Token).Where("token", authorization)
 
-	response := &Response{
+	response := &m.Response{
 		Message:    "Logout successful",
 		Success:    true,
 		StatusCode: http.StatusOK,
@@ -391,7 +391,7 @@ func UserGet(c *gin.Context) {
 	err = db.Find(&users).Error
 
 	if err != nil {
-		response := &ResponseUser{
+		response := &m.ResponseUser{
 			Message: err.Error(),
 		}
 		c.JSON(http.StatusServiceUnavailable, response)
@@ -399,7 +399,7 @@ func UserGet(c *gin.Context) {
 		return
 	}
 
-	response := &ResponseUser{
+	response := &m.ResponseUser{
 		Message: "Get users",
 		Users:   users,
 	}
@@ -412,7 +412,7 @@ func UserDetail(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		response := &ResponseUser{
+		response := &m.ResponseUser{
 			Message: err.Error(),
 		}
 		c.JSON(http.StatusBadRequest, response)
@@ -424,7 +424,7 @@ func UserDetail(c *gin.Context) {
 	err = db.Where("id = ?", id).First(&user).Error
 
 	if err != nil {
-		response := &ResponseUser{
+		response := &m.ResponseUser{
 			Message: err.Error(),
 		}
 		c.JSON(http.StatusServiceUnavailable, response)
@@ -432,7 +432,7 @@ func UserDetail(c *gin.Context) {
 		return
 	}
 
-	response := &ResponseUser{
+	response := &m.ResponseUser{
 		Message: "Get user",
 		Users:   user,
 	}
@@ -445,7 +445,7 @@ func UserCreate(c *gin.Context) {
 	user := &Users{}
 	err := c.BindJSON(&user)
 	if err != nil {
-		response := &ResponseUser{
+		response := &m.ResponseUser{
 			Message: err.Error(),
 		}
 		c.JSON(http.StatusBadRequest, response)
@@ -456,7 +456,7 @@ func UserCreate(c *gin.Context) {
 	err = db.Create(user).Error
 
 	if err != nil {
-		response := &ResponseUser{
+		response := &m.ResponseUser{
 			Message: err.Error(),
 		}
 		c.JSON(http.StatusBadRequest, response)
@@ -464,7 +464,7 @@ func UserCreate(c *gin.Context) {
 		return
 	}
 
-	response := &ResponseUser{
+	response := &m.ResponseUser{
 		Message: "User has been created",
 		Users:   user,
 	}
@@ -478,7 +478,7 @@ func UserUpdate(c *gin.Context) {
 	id64, err := strconv.ParseUint(idStr, 10, 64)
 	id := uint(id64)
 	if err != nil {
-		response := &ResponseUser{
+		response := &m.ResponseUser{
 			Message: err.Error(),
 		}
 		c.JSON(http.StatusBadRequest, response)
@@ -489,7 +489,7 @@ func UserUpdate(c *gin.Context) {
 	user := &Users{}
 	err = c.BindJSON(&user)
 	if err != nil {
-		response := &ResponseUser{
+		response := &m.ResponseUser{
 			Message: err.Error(),
 		}
 		c.JSON(http.StatusBadRequest, response)
@@ -501,7 +501,7 @@ func UserUpdate(c *gin.Context) {
 	err = db.Save(user).Error
 
 	if err != nil {
-		response := &ResponseUser{
+		response := &m.ResponseUser{
 			Message: err.Error(),
 		}
 		c.JSON(http.StatusBadRequest, response)
@@ -509,7 +509,7 @@ func UserUpdate(c *gin.Context) {
 		return
 	}
 
-	response := &ResponseUser{
+	response := &m.ResponseUser{
 		Message: "User has been updated",
 		Users:   user,
 	}
@@ -522,7 +522,7 @@ func UserDelete(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
-		response := &ResponseUser{
+		response := &m.ResponseUser{
 			Message: err.Error(),
 		}
 		c.JSON(http.StatusBadRequest, response)
@@ -533,7 +533,7 @@ func UserDelete(c *gin.Context) {
 	err = db.Where("id = ?", id).Delete(&Users{}).Error
 
 	if err != nil {
-		response := &ResponseUser{
+		response := &m.ResponseUser{
 			Message: err.Error(),
 		}
 		c.JSON(http.StatusServiceUnavailable, response)
@@ -541,7 +541,7 @@ func UserDelete(c *gin.Context) {
 		return
 	}
 
-	response := &ResponseUser{
+	response := &m.ResponseUser{
 		Message: "User has been deleted",
 	}
 
@@ -886,7 +886,7 @@ func CategoryPostsList(c *gin.Context) {
 // func UserPostsGet(c *gin.Context) {
 // 	authorization := c.Request.Header.Get("Authorization")
 // 	if authorization != "2n41jt01fk1-cj2190c129je211x910s19k112i012d" {
-// 		response := &ResponseUser{
+// 		response := &m.ResponseUser{
 // 			Message: "Unauthorized access",
 // 		}
 // 		c.JSON(http.StatusUnauthorized, response)
