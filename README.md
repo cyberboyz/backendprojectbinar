@@ -1,4 +1,4 @@
-# dreamcatchertimche
+# backendprojectbinar - dreamcatchertimche
 
 Repository ini digunakan untuk membuat kode backend dari aplikasi Dreamcatcher yang digunakan pada project Binar Batch 3 di Tim C. Pada kode ini terdapat API untuk melakukan autentikasi (sign up, login, dan logout) dan operasi CRUD yang hanya pada tabel posts, users, categories, bookmarks dan comments yang digunakan oleh tim Front End (Android & iOS) untuk menampilkan data di sisi client. 
 
