@@ -56,10 +56,56 @@ git commit -m "Deploy Heroku"
 git push heroku master
 ```
 
-Setelah berhasil di-deploy ke Heroku, jalankan perintah ```heroku open``` untuk membuka URL tempat deploy aplikasi atau lakukan tes melalui Postman dengan menggunakan URL yang digunakan.
+Setelah berhasil di-deploy ke Heroku, jalankan perintah ```heroku open``` untuk membuka URL tempat deploy aplikasi atau lakukan tes melalui Postman dengan menggunakan URL yang digunakan. 
+
+## Pengujian dengan Postman
+
+Untuk pengujian melalui Postman dilakukan dengan menggunakan <nama_URL_heroku>/v1/<nama_resource>. Adapun list dari resource yang dapat diakses adalah :
+```
+Authentication
+POST /v1/register
+POST /v1/login
+POST /v1/logout
+
+Posts
+POST /v1/posts
+GET /v1/posts
+GET /v1/posts/{id_post}
+PUT /v1/posts/{id_post}
+DELETE /v1/posts/{id_post}
+
+Categories
+GET /v1/categories
+GET /v1/categories/showposts
+
+Profile
+GET /v1/profile
+PUT /v1/profile
+PATCH /v1/profile
+GET /v1/profile/posts
+POST /v1/profile/categories
+
+Bookmarks
+POST /v1/bookmarks
+GET /v1/bookmarks
+DELETE /v1/bookmarks/{id_bookmark}
+
+Comments
+POST /v1/posts/{id_post}/comments
+GET /v1/posts/{id_post}/comments
+GET /v1/posts/{id_post}/comments/{id_comment}
+PUT /v1/posts/{id_post}/comments/{id_comment}
+DELETE /v1/posts/{id_post}/comments/{id_comment}
+```
+
+# Penjelasan Aplikasi
 
 ## Autentikasi
 
-Autentikasi sign up dilakukan dengan memasukkan input request yang berupa nama, email, dan password pada JSON body untuk disimpan ke dalam database. Password disimpan dalam database dengan enkripsi bcrypt. Setelah melakukan sign up, user bisa melakukan login dengan memasukkan email dan password pada token di-generate secara random dan berbeda dengan masukan seed berupa waktu saat ini.
+Autentikasi sign up dilakukan dengan memasukkan input request yang berupa nama, email, dan password pada JSON body untuk disimpan ke dalam database. Password disimpan dalam database dengan enkripsi bcrypt. Setelah melakukan sign up, user bisa melakukan login dengan memasukkan email dan password pada input request dengan keluaran berupa token yang di-generate secara random.
+
+## Operasi CRUD pada Posts, Users, Bookmarks, Categories, dan Comments
+
+Operasi CRUD (create, read, update, dan delete) pada tabel posts, users, bookmarks, categories, dan comments dilakukan dengan menggunakan token yang didapatkan saat login. Token tersebut dimasukkan ke header bagian Authorization.
 
 ** File blueprint API : apiary.apib **
