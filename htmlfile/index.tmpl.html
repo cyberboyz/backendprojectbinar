@@ -1,0 +1,48 @@
+<html lang="en">
+<meta charset="utf-8">
+<title>apiary.io—404—No Resource Found!</title>
+<body>
+<div id="bg"></div>
+ <div id="message">
+  <h1>The resource you're looking for doesn't exist. <br>Please check the <a href="http://docs.morpheus3.apiary.io/">API documentation</a> or have a look on available resources below.</h1>
+  <p></p>
+  <ol>
+          <section><h2>Authentication</h2>
+                  <li><b>POST</b> /v1/register</li>
+                  <li><b>POST</b> /v1/login</li>
+                  <li><b>POST</b> /v1/logout</li>
+              </section>
+          <section><h2>Posts</h2>
+                  <li><b>POST</b> /v1/posts</li>
+                  <li><b>GET</b> /v1/posts</li>
+                  <li><b>GET</b> /v1/posts/{id_post}</li>
+                  <li><b>PUT</b> /v1/posts/{id_post}</li>
+                  <li><b>DELETE</b> /v1/posts/{id_post}</li>
+              </section>
+          <section><h2>Categories</h2>
+                  <li><b>GET</b> /v1/categories</li>
+                  <li><b>GET</b> /v1/categories/showposts</li>
+              </section>
+          <section><h2>Profile</h2>
+                  <li><b>GET</b> /v1/profile</li>
+                  <li><b>PUT</b> /v1/profile</li>
+                  <li><b>PATCH</b> /v1/profile</li>
+                  <li><b>GET</b> /v1/profile/posts</li>
+                  <li><b>POST</b> /v1/profile/categories</li>
+              </section>
+          <section><h2>Bookmarks</h2>
+                  <li><b>POST</b> /v1/bookmarks</li>
+                  <li><b>GET</b> /v1/bookmarks</li>
+                  <li><b>DELETE</b> /v1/bookmarks/{id_bookmark}</li>
+              </section>
+          <section><h2>Comments</h2>
+                  <li><b>POST</b> /v1/posts/{id_post}/comments</li>
+                  <li><b>GET</b> /v1/posts/{id_post}/comments</li>
+                  <li><b>GET</b> /v1/posts/{id_post}/comments/{id_comment}</li>
+                  <li><b>PUT</b> /v1/posts/{id_post}/comments/{id_comment}</li>
+                  <li><b>DELETE</b> /v1/posts/{id_post}/comments/{id_comment}</li>
+              </section>
+      </ol>
+  </div>
+</body>
+</html>
