@@ -33,20 +33,33 @@ Setelah itu, aplikasi bisa dijalankan dengan mengetikkan perintah ```go run main
 
 ## Deploy ke Cloud
 
-Pada 
+Pada project ini, cloud yang digunakan adalah Heroku. Untuk unggah aplikasi ke heroku, daftar terlebih dahulu ke heroku lewat https://signup.heroku.com/. Kemudian install Heroku CLI melalui https://devcenter.heroku.com/articles/heroku-cli. Setelah Heroku CLI terinstall, ketikkan perintah berikut ini di command line untuk membuat aplikasi Heroku:
+```
+heroku create
+```
+
+Kemudian lakukan login:
+```
+heroku login
+```
+
+Setelah itu buat database postgresql di Heroku:
+```
+heroku addons:create heroku-postgresql
+```
+
+Database yang digunakan akan terdeteksi secara otomatis karena digunakan kode ```os.Getenv($DATABASE_URL)``` pada variabel ```db_url``` untuk mendeteksi URL database default yang digunakan pada Heroku.
+Kemudian masukkan perintah ini untuk deploy repository ke Heroku:
+```
+git add . -A
+git commit -m "Deploy Heroku"
+git push heroku master
+```
+
+Setelah berhasil di-deploy ke Heroku, jalankan perintah ```heroku open``` untuk membuka URL tempat deploy aplikasi atau lakukan tes melalui Postman dengan menggunakan URL yang digunakan.
 
 ## Autentikasi
 
 Autentikasi sign up dilakukan dengan memasukkan input request yang berupa nama, email, dan password pada JSON body untuk disimpan ke dalam database. Password disimpan dalam database dengan enkripsi bcrypt. Setelah melakukan sign up, user bisa melakukan login dengan memasukkan email dan password pada token di-generate secara random dan berbeda dengan masukan seed berupa waktu saat ini.
-
-## Rancangan Database MySQL
-
-Database yang digunakan adalah binar_backend_test.sql di mana terdapat empat tabel, yaitu tabel data pengguna, soal ujian, jenis ujian, dan jawaban ujian. Adapun keterangan detail terkait kolom dan tipe data yang digunakan dapat dilihat dengan melakukan import file database binar_backend_test.sql.
-
-## Rancangan RESTful API Sederhana
-
-API yang akan dibuat dirancang terlebih dahulu untuk mempermudah proses pembuatan API dengan menggunakan Apiary (apiary.io). Pada API ini, keamanan komunikasi data dilakukan dengan autentikasi terlebih dahulu dengan OAuth 2.0 atau JWT. Setelah pengguna mendapatkan token autentikasi, pengguna dapat mengakses API berdasarkan privilege yang dimiliki. Operasi yang dapat dilakukan melalui API ini antara lain adalah :
-- Operasi create, read, delete, dan update (CRUD) pada data pengguna dan soal ujian dengan privilege admin
-- Operasi autentikasi user dan pemilihan serta penyimpanan jawaban ujian
 
 ** File blueprint API : apiary.apib **
