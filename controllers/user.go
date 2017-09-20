@@ -1,102 +1,20 @@
-package main
+package controllers
 
 import (
-	// cont "baru-dreamcatcher/controllers"
 	m "baru-dreamcatcher/models"
-	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/gorm"
-	_ "github.com/lib/pq"
 	"golang.org/x/crypto/bcrypt"
 	"math/rand"
 	"net/http"
-	"os"
 	"regexp"
 	"strconv"
 	"strings"
 	"time"
 )
 
-var db *gorm.DB
 var err error
-
-func main() {
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
-
-	db_url := os.Getenv("DATABASE_URL")
-	if db_url == "" {
-		db_url = "host=localhost user=postgres dbname=gorm sslmode=disable password=postgres"
-	}
-
-	db, err = gorm.Open("postgres", db_url)
-
-	db.SingularTable(true)
-
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	// Kode yang dikomen untuk delete tabel
-	// db.DropTable("users", "bookmarks", "posts", "categories")
-	db.AutoMigrate(&m.Users{}, &m.Bookmarks{}, &m.Posts{}, &m.Categories{})
-
-	router := gin.New()
-
-	// Menampilkan page di halaman utama terkait resource yang bisa diakses beserta method-nya
-	router.LoadHTMLGlob("htmlfile/*.tmpl.html")
-	router.Static("/static", "static")
-	router.GET("/", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "index.tmpl.html", nil)
-	})
-
-	v1 := router.Group("/v1")
-	{
-
-		v1.POST("/login/", LoginUser)
-		v1.POST("/register/", RegisterUser)
-
-		logged_in := v1.Group("")
-		logged_in.Use(AuthorizeMiddleware)
-		{
-			logged_in.GET("/logout/", LogoutUser)
-			post := logged_in.Group("/posts")
-			{
-				post.GET("/", PostGet)
-				post.GET("/:id", PostDetail)
-				post.POST("/", PostCreate)
-				post.PUT("/:id", PostUpdate)
-				post.PATCH("/:id", PostUpdate)
-				post.DELETE("/:id", PostDelete)
-			}
-			usergroup := logged_in.Group("/profile")
-			{
-				usergroup.GET("/", UserGet)
-				usergroup.GET("/:id", UserDetail)
-				usergroup.POST("/", UserCreate)
-				usergroup.PUT("/:id", UserUpdate)
-				usergroup.PATCH("/:id", UserUpdate)
-				usergroup.DELETE("/:id", UserDelete)
-				usergroup.GET("/:id/posts", UserPostsGet)
-			}
-			bookmark := logged_in.Group("/bookmarks")
-			{
-				bookmark.POST("/", BookmarkCreate)
-				bookmark.GET("/", BookmarkGet)
-				bookmark.DELETE("/:id", BookmarkDelete)
-			}
-			category := logged_in.Group("/categories")
-			{
-				category.POST("/", CategoryCreate)
-				category.GET("/", CategoryGet)
-				category.GET("/:id", CategoryPostsList)
-			}
-		}
-	}
-	router.Run(":" + port)
-}
+var db *gorm.DB
 
 func AuthorizeMiddleware(c *gin.Context) {
 	authorization := c.Request.Header.Get("Authorization")
@@ -774,35 +692,33 @@ func CategoryPostsList(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
-func UserPostsGet(c *gin.Context) {
+// func UserPostsGet(c *gin.Context) {
+// 	authorization := c.Request.Header.Get("Authorization")
+// 	if authorization != "2n41jt01fk1-cj2190c129je211x910s19k112i012d" {
+// 		response := &m.ResponseUser{
+// 			Message: "Unauthorized access",
+// 		}
+// 		c.JSON(http.StatusUnauthorized, response)
+// 		c.Abort()
+// 		return
+// 	}
 
-	idStr := c.Param("id")
-	id, err := strconv.Atoi(idStr)
-	if err != nil {
-		response := &m.ResponseUser{
-			Message: err.Error(),
-		}
-		c.JSON(http.StatusBadRequest, response)
-		c.Abort()
-		return
-	}
+// 	posts := []*Posts{}
 
-	posts := []*m.Posts{}
-	err = db.Order("created_at desc").Where("id_user = ?", id).Find(&posts).Error
-	// err = db.Table("posts").Order("created_at desc").Joins("JOIN users on users.id = posts.id_user").Scan(&posts).Error
+// 	err = db.Where("id = ?", posts.).Find(&posts).Error
 
-	if err != nil {
-		response := &m.ResponsePost{
-			Message: err.Error(),
-		}
-		c.JSON(http.StatusServiceUnavailable, response)
-		c.Abort()
-		return
-	}
+// 	if err != nil {
+// 		response := &m.ResponsePost{
+// 			Message: err.Error(),
+// 		}
+// 		c.JSON(http.StatusServiceUnavailable, response)
+// 		c.Abort()
+// 		return
+// 	}
 
-	response := &m.ResponsePost{
-		posts, "Get posts", m.SuccessStatus{true, 200},
-	}
+// 	response := &m.ResponsePost{
+// 		posts, "Get posts", m.SuccessStatus{true, 200},
+// 	}
 
-	c.JSON(http.StatusOK, response)
-}
+// 	c.JSON(http.StatusOK, response)
+// }
