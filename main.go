@@ -40,7 +40,7 @@ func main() {
 	}
 
 	// Kode yang dikomen untuk delete tabel
-	// db.DropTable("users", "bookmarks", "posts", "categories")
+	db.DropTable("users", "bookmarks", "posts", "categories")
 	db.AutoMigrate(&m.Users{}, &m.Bookmarks{}, &m.Posts{}, &m.Categories{})
 
 	router := gin.New()
