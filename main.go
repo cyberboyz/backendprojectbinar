@@ -16,17 +16,43 @@ import (
 )
 
 type Users struct {
-	ID           uint      `gorm:"primary_key" json:"id_user"`
-	Email        string    `gorm:"unique_index" json:"email"`
-	Name         string    `json:"name"`
+	ResponseUsers
+	Password string `json:"password"`
+}
+
+type SuccessStatus struct {
+	Success    bool `json:"success"`
+	StatusCode int  `json:"status_code"`
+}
+
+type ResponseUsersSignUp struct {
+	ID    uint   `gorm:"primary_key" json:"id_user"`
+	Email string `gorm:"unique_index" json:"email"`
+	Name  string `json:"name"`
+}
+
+type ResponseUsers struct {
+	ResponseUsersSignUp
+	Token        string    `json:"token"`
 	Address      string    `json:"address"`
 	Bio          string    `json:"bio"`
 	IDAvatar     int       `json:"id_avatar"`
 	IDCoverPhoto int       `json:"id_cover_photo"`
-	CreatedAt    time.Time `json:"created_at"`
+	CreatedAt    time.Time `json:"published_at"`
 	UpdatedAt    time.Time `json:"updated_at"`
-	Password     string    `json:"password"`
-	Token        string    `json:"token"`
+}
+
+type Response struct {
+	Message    string      `json:"message"`
+	Success    bool        `json:"success"`
+	StatusCode int         `json:"status_code"`
+	Data       interface{} `json:"data, omitempty"`
+}
+
+type Status struct {
+	Message    string `json:"message"`
+	Success    bool   `json:"success"`
+	StatusCode int    `json:"status_code"`
 }
 
 type Login struct {
@@ -41,30 +67,39 @@ type Categories struct {
 
 type Posts struct {
 	ID           uint      `gorm:"primary_key" json:"id_post"`
+	Name         string    `json:"name"`
+	Email        string    `gorm:"unique_index" json:"email"`
+	IDUser       uint      `json:"id_user"`
+	Address      string    `json:"address"`
+	IDAvatar     int       `json:"id_avatar"`
+	IDBackground uint      `json:"id_background"`
+	PostTitle    string    `json:"post_title"`
+	Categories   string    `json:"categories"`
+	Content      string    `json:"content"`
+	CreatedAt    time.Time `json:"published_at"`
+}
+
+type PostsUsersJoin struct {
+	ID           uint      `gorm:"primary_key" json:"id_post"`
 	IDUser       uint      `json:"id_user"`
 	IDBackground uint      `json:"id_background"`
 	PostTitle    string    `json:"post_title"`
 	Categories   string    `json:"categories"`
 	Content      string    `json:"content"`
-	CreatedAt    time.Time `json:"created_at"`
+	CreatedAt    time.Time `json:"published_at"`
 }
 
 type Bookmarks struct {
 	ID        uint      `gorm:"primary_key" json:"id_bookmark"`
 	IDUser    uint      `json:"id_user"`
 	IDPost    uint      `json:"id_post"`
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt time.Time `json:"published_at"`
 }
 
 type Authentication struct {
 	Email    string `gorm:"primary_key" json:"email" binding:"required"`
 	Name     string `json:"name" binding:"required"`
 	Password string `json:"password" binding:"required"`
-}
-
-type SuccessStatus struct {
-	Success    bool `json:"success"`
-	StatusCode int  `json:"status_code"`
 }
 
 type ResponseUser struct {
@@ -106,7 +141,7 @@ func main() {
 	if db_url == "" {
 		db_url = "host=localhost user=postgres dbname=gorm sslmode=disable password=postgres"
 	}
-	// db, err = gorm.Open("postgres", "host=localhost user=postgres dbname=gorm sslmode=disable password=postgres")
+
 	db, err = gorm.Open("postgres", db_url)
 
 	db.SingularTable(true)
@@ -246,6 +281,15 @@ func RegisterUser(c *gin.Context) {
 	hash, _ := bcrypt.GenerateFromPassword([]byte(register.Password), bcrypt.DefaultCost)
 	register.Password = string(hash)
 
+	if register.Name == "" {
+		response := &ResponseAuth{
+			Message: "Error : Name cannot be empty",
+		}
+		c.JSON(http.StatusBadRequest, response)
+		c.Abort()
+		return
+	}
+
 	err = db.Create(register).Error
 
 	if err != nil {
@@ -257,9 +301,13 @@ func RegisterUser(c *gin.Context) {
 		return
 	}
 
-	response := &ResponseAuth{
-		Message:        "New User has been created",
-		Authentication: register,
+	registerOutput := register.ResponseUsersSignUp
+
+	response := &Response{
+		Success:    true,
+		StatusCode: http.StatusCreated,
+		Message:    "New User has been created",
+		Data:       registerOutput,
 	}
 
 	c.JSON(http.StatusCreated, response)
@@ -280,38 +328,54 @@ func LoginUser(c *gin.Context) {
 
 	err = c.BindJSON(&login)
 	inputPassword := login.Password
+	login.Email = strings.ToLower(login.Email)
 
 	db.Where("email = ? ", login.Email).Find(&login)
 
 	err = bcrypt.CompareHashAndPassword([]byte(login.Password), []byte(inputPassword))
+
+	if err != nil {
+		response := &Response{
+			Message:    "Error : Unauthorized User",
+			Success:    false,
+			StatusCode: http.StatusUnauthorized,
+		}
+		c.JSON(http.StatusBadRequest, response)
+		c.Abort()
+		return
+	}
 
 	if login.Token == "" {
 		login.Token = randToken(20)
 		db.Model(login).Update("token", login.Token)
 	}
 
-	response := &ResponseAuth{
-		Message:        "New User has been created",
-		Authentication: login,
+	loginOutput := login.ResponseUsers
+
+	response := &Response{
+		Message:    "New User has been created",
+		Success:    true,
+		StatusCode: http.StatusOK,
+		Data:       loginOutput,
 	}
 
-	if err == nil {
-		c.JSON(http.StatusOK, response)
-	} else {
-		c.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized", "success": false, "status_code": http.StatusUnauthorized})
-	}
+	c.JSON(http.StatusOK, response)
 }
 
 func LogoutUser(c *gin.Context) {
 	logout := &Users{}
 
 	authorization := c.Request.Header.Get("Authorization")
-	fmt.Println(authorization)
 
 	db.Model(logout).Update("token", logout.Token).Where("token", authorization)
 
-	c.JSON(http.StatusOK, gin.H{"message": "Logout successful",
-		"success": true, "status_code": http.StatusOK})
+	response := &Response{
+		Message:    "Logout successful",
+		Success:    true,
+		StatusCode: http.StatusOK,
+	}
+
+	c.JSON(http.StatusOK, response)
 }
 
 func UserGet(c *gin.Context) {
@@ -564,8 +628,9 @@ func BookmarkDelete(c *gin.Context) {
 
 func PostGet(c *gin.Context) {
 
-	posts := []*Posts{}
-	err = db.Find(&posts).Error
+	posts := []*PostsUsersJoin{}
+	// err = db.Order("created_at desc").Find(&posts).Error
+	err = db.Table("posts", "users").Order("created_at desc").Joins("JOIN users on users.id = posts.id_user").Scan(&posts).Error
 
 	if err != nil {
 		response := &ResponsePost{
@@ -629,6 +694,12 @@ func PostCreate(c *gin.Context) {
 		c.Abort()
 		return
 	}
+
+	authorization := c.Request.Header.Get("Authorization")
+	auth := &Users{}
+	err = db.Where("token = ? ", authorization).Find(&auth).Error
+
+	post.IDUser = auth.ID
 
 	err = db.Create(post).Error
 
