@@ -628,9 +628,9 @@ func BookmarkDelete(c *gin.Context) {
 
 func PostGet(c *gin.Context) {
 
-	posts := []*PostsUsersJoin{}
-	// err = db.Order("created_at desc").Find(&posts).Error
-	err = db.Table("posts", "users").Order("created_at desc").Joins("JOIN users on users.id = posts.id_user").Scan(&posts).Error
+	posts := []*Posts{}
+	err = db.Order("created_at desc").Find(&posts).Error
+	// err = db.Table("posts").Order("created_at desc").Joins("JOIN users on users.id = posts.id_user").Scan(&posts).Error
 
 	if err != nil {
 		response := &ResponsePost{

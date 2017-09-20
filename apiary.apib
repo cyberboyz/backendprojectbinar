@@ -1,0 +1,1092 @@
+FORMAT: 1A
+HOST: http://private-2932ba-morpheus3.apiary-mock.com
+
+# Dreamcatcher API
+
+Ini adalah blueprint API sederhana untuk melakukan operasi CRUD (create, read, update, dan delete) pada database bagi pengguna yang terautentikasi.
+
+## Group Authentication
+
+Morpheus menggunakan token yang didapat dari autentikasi untuk bisa mengakses API operasi terkait CRUD pada database.
+
+## User Sign Up / Register [/v1/register]
+
+### Sign Up / Register [POST]
+
+Untuk mendaftar sebagai pengguna dengan nama, email dan password.
+
++ Request (application/json)
+
+    + Body
+
+            {   
+                "name": "John Cena",
+                "email": "john.cena@invisible.com",
+                "password": "UserPasswd"
+            }
+    
++ Response 200 (application/json)
+
+    + Body 
+        
+            {
+                "data": {
+                    "id_user": 3,
+                    "name": "John Cena",
+                    "email": "john.cena@invisible.com"
+                },
+                "success": true,
+                "message": "Registration Successful",
+                "status_code": 200
+            }
+
++ Response 400 (application/json)
+
+    + Body
+    
+            {
+                "success": false,
+                "message": "Invalid Parameters",
+                "status_code": 400
+            }
+            
+## User Login [/v1/login]
+
+### Login [POST]
+
+Untuk masuk sebagai pengguna dengan email dan password.
+
++ Request (application/json)
+
+    + Body
+
+            {
+                "email": "john.cena@invisible.com",
+                "password": "UserPasswd"
+            }
+    
++ Response 200 (application/json)
+
+    + Body 
+        
+            {
+                "token": "tkn_b3275960d68fda9d831facc0426c3bbc",
+                "email": "john.cena@invisible.com",
+                "success": true,
+                "message": "Login Successful",
+                "status_code": 200
+            }
+
++ Response 400 (application/json)
+
+    + Body
+    
+            {
+                "success": false,
+                "message": "Invalid Parameters",
+                "status_code": 400
+            }
+
+## User Logout [/v1/logout]
+
+### Logout [POST]
+
+Untuk menyelesaikan autentikasi.
+
++ Request (application/json)
+
+    + Headers
+    
+                Authorization: token
+    
++ Response 200 (application/json)
+
+    + Body 
+        
+            {
+                "success": true,
+                "message": "Logout Successful",
+                "status_code": 200
+            }
+
++ Response 400 (application/json)
+
+    + Body
+    
+            {
+                "success": false,
+                "message": "Invalid Parameters",
+                "status_code": 400
+            }
+
+## Group Posts
+
+## Create a New Post and Get All Posts / Feeds Operation [/v1/posts]
+
+### Create a New Post [POST]
+
+Untuk membuat post baru.
+
++ Request (application/json)
+
+    + Headers
+    
+                Authorization: token
+
+    + Body
+    
+            {
+                "id_user": 3,
+                "id_background": 3,
+                "post_title": "Little Things Do Make A Difference",
+                "categories": "Facilities",
+                "content": "This is the content for little things do make a difference. Enjoy!"
+            }
+
++ Response 201 (application/json)
+
+    + Headers
+
+            Location: /v1/posts/1
+
+    + Body
+
+            {
+                "posts": 
+                {
+                    "id_post": 4,
+                    "id_user": 3,
+                    "id_background": 3,
+                    "post_title": "Little Things Do Make A Difference",
+                    "categories": "Aku Sudah Lelah",
+                    "content": "This is the content for little things do make a difference. Enjoy!",
+                    "published_at": "2016-08-05T08:40:51.620Z"
+                },
+                "message": "Post has been created",
+                "success": true,
+                "status_code": 200
+            }
+
++ Response 400 (application/json)
+
+    + Body
+    
+            {
+                "success": false,
+                "message": "Invalid Parameters",
+                "status_code": 400
+            }
+
+### Get All Posts / Feeds [GET]
+
+Untuk menampilkan semua postingan ke timeline Feeds. Feeds yang ditampilkan bergantung pada kategori yang dipilih pengguna ketika mendaftar sehingga dibutuhkan parameter input berupa id_user.
+
++ Request
+
+    + Headers
+    
+            Authorization: token
+            
+    + Body
+    
+            {
+                "id_user": 4
+            }
+
+
++ Response 200 (application/json)
+            
+            {
+                "posts":
+                    [
+                        {
+                            "id_post": 4,
+                            "name": "Clayton French",
+                            "id_avatar": 2,
+                            "post_title": "Know Yourself Your Inner Power",
+                            "id_background": 1,
+                            "categories": "Finances",
+                            "content": "At about this time of the year, we will have a special guest named Victor. This is what we're going to see from him. Let's take a look!",
+                            "published_at": "2017-08-05T08:40:51.620Z"
+                        },
+                        {
+                            "id_post": 5,
+                            "name": "Donna Jennifer",
+                            "id_avatar": 4,
+                            "post_title": "What's My Life Purpose?",
+                            "id_background": 2,
+                            "categories": "Skills",
+                            "content": "This is the content for motivating yourself. Enjoy!",
+                            "published_at": "2015-08-05T08:40:51.620Z"
+                        },
+                        {
+                            "id_post": 6,
+                            "name": "Mae Spencer",
+                            "id_avatar": 5,
+                            "post_title": "Why Am I Even Here?",
+                            "id_background": 3,
+                            "categories": "Skills",
+                            "content": "This is the content for living in the now. Enjoy!",
+                            "published_at": "2015-04-05T08:40:51.620Z"
+                        }
+                    ],
+                "success": true,
+                "message": "Posts have been shown",
+                "status_code": 200
+            }
+
++ Response 400 (application/json)
+
+    + Body
+    
+            {
+                "success": false,
+                "message": "Invalid Parameters",
+                "status_code": 400
+            }
+
+## Read, Update, and Delete Certain Post Operation [/v1/posts/{id_post}]
+
++ Parameters
+    + id_post: 1 (required, number) - ID dari post dalam integer
+
+### Read Post Detail [GET]
+
+Untuk membaca post dengan ID tertentu. Variabel "edit_mode" berfungsi untuk menentukan apakah post tersebut milik sendiri atau bukan. Apabila milik sendiri, maka "edit_mode" bernilai true dan pengguna bisa mengubah post. Begitu juga sebaliknya, apabila "edit_mode" bernilai false, maka post itu milik orang lain dan pengguna tidak dapat mengubah post sehingga yang dimunculkan adalah tombol bookmark.
+
++ Request
+
+    + Headers
+    
+                Authorization: token
+
++ Response 200 (application/json)
+
+        {
+            "id_post": 4,
+            "name": "Mae Spencer",
+            "id_avatar":3,
+            "post_title": "Living in the Now Use It to Enrich Yourself",
+            "id_background": 3,
+            "categories": "Opportunities",
+            "content": "This is the content for living in the now. Enjoy!",
+            "published_at": "2015-04-05T08:40:51.620Z",
+            "edit_mode": true,
+            "success": true,
+            "message": "Post Detail has been shown",
+            "status_code": 200
+        }
+
++ Response 400 (application/json)
+
+    + Body
+    
+            {
+                "success": false,
+                "message": "Invalid Parameters",
+                "status_code": 400
+            }
+
+### Update Post [PUT]
+
+Untuk update post dengan ID tertentu.
+
++ Request (application/json)
+
+    + Headers
+    
+                Authorization: token
+                
+    + Body
+
+            {
+                "name": "Joko",
+                "post_title": "Living in the Now Use It to Enrich Yourself",
+                "id_background": 3,
+                "categories": "Courses",
+                "content": "This is the content for living in the now. Enjoy!"
+            }
+
++ Response 201 (application/json)
+
+    + Headers
+
+            Location: /v1/user_data/1
+
+    + Body
+
+            {
+                "id_post": 4,
+                "name": "Joko",
+                "post_title": "Living in the Now Use It to Enrich Yourself",
+                "id_background": 3,
+                "categories": "Facilities",
+                "content": "This is the content for living in the now. Enjoy!",
+                "published_at": "2017-04-05T08:40:51.620Z",
+                "success": true,
+                "message": "Post has been updated",
+                "status_code": 200
+            }
+
++ Response 400 (application/json)
+
+    + Body
+    
+            {
+                "success": false,
+                "message": "Invalid Parameters",
+                "status_code": 400
+            }
+
+### Delete Post [DELETE]
+
+Untuk menghapus post dengan ID tertentu.
+
++ Request
+
+    + Headers
+    
+                Authorization: token
+
++ Response 204
+
++ Response 400 (application/json)
+
+    + Body
+    
+            {
+                "success": false,
+                "message": "Invalid Parameters",
+                "status_code": 400
+            }
+
+## Group Categories
+
+## List All Categories [/v1/categories]
+                
+### Show All Categories [GET]
+
++ Request (application/json)
+
+    + Headers
+    
+                Authorization: token
+    
++ Response 200 (application/json)
+
+    + Body
+    
+                {
+                    "categories":
+                        [
+                            {
+                                "categories": "Finances",
+                                "id_background": 4
+                            },
+                            {
+                                "categories": "Skills",
+                                "id_background": 5
+                            },
+                            {
+                                "categories": "Facilities",
+                                "id_background": 3
+                            },
+                            {
+                                "categories": "Opportunities",
+                                "id_background": 2
+                            },
+                            {
+                                "categories": "Courses",
+                                "id_background": 1
+                            }
+                        ],
+                    "success": true,
+                    "message": "Categories have been shown",
+                    "status_code": 200
+                }
+
++ Response 400 (application/json)
+
+    + Body
+    
+            {
+                "success": false,
+                "message": "Invalid Parameters",
+                "status_code": 400
+            }
+
+
+## List All Posts Based on Categories [/v1/categories/showposts]
+
+### Show All Posts Based on One or Several Categories [GET]
+
++ Request (application/json)
+
+    + Headers
+    
+                Authorization: token
+
+    + Body
+    
+            {
+                "categories": "Courses"
+            }
+            
++ Response 200 (application/json)
+
+    + Body
+            
+                {   
+                    "posts":
+                        [
+                            {
+                                "id_post": 6,
+                                "post_title": "Why Do We Exist?",
+                                "id_background": 3,
+                                "categories": "Courses",
+                                "name": "Mae Spencer",
+                                "id_avatar": 5,
+                                "published_at": "2015-04-05T08:40:51.620Z"
+                            },
+                            {
+                                "id_post": 4,
+                                "post_title": "Something Else",
+                                "id_background": 1,
+                                "categories": "Courses",
+                                "name": "Bill Gates",
+                                "id_avatar": 2,
+                                "published_at": "2016-04-05T08:40:51.620Z"
+                            },
+                            {
+                                "id_post": 4,
+                                "post_title": "Living in the Now Use It to Enrich Yourself",
+                                "id_background": 1,
+                                "categories": "Courses",
+                                "name": "Steve Jobs",
+                                "id_avatar": 3,
+                                "published_at": "2017-04-05T08:40:51.620Z"
+                            },
+                            {
+                                "id_post": 5,
+                                "post_title": "Aku lelah",
+                                "id_background": 3,
+                                "categories": "Courses",
+                                "name": "Jeff Bezos",
+                                "id_avatar": 1,
+                                "published_at": "2015-08-05T08:40:51.620Z"
+                            },
+                            {
+                                "id_post": 6,
+                                "post_title": "Ku sudah lelah",
+                                "id_background": 2,
+                                "categories": "Courses",
+                                "name": "Someone",
+                                "id_avatar": 4,
+                                "published_at": "2016-09-15T08:40:51.620Z"
+                            }
+                        ],
+                    "success": true,
+                    "message": "Posts based on categories have been shown",
+                    "status_code": 200
+                }
+            
++ Response 400 (application/json)
+
+    + Body
+    
+            {
+                "success": false,
+                "message": "Invalid Parameters",
+                "status_code": 400
+            }
+
+## Group Profile
+
+## User Profile [/v1/profile]
+
+### Show Profile Details [GET]
+
+Menampilkan data detail dari suatu user.
+
++ Request (application/json)
+
+    + Headers
+    
+                Authorization: token
+
++ Response 200 (application/json)
+
+            {
+                "id_user": 3,
+                "name": "Virgie Underwood",
+                "address": "Palo Alto, CA",
+                "bio": "Fashion Enthusiast",
+                "total_posts": 892,
+                "id_avatar": 2,
+                "id_cover_photo": 3,
+                "categories": ["Finances", "Courses", "Facilities"],
+                "success": true,
+                "message": "Success",
+                "status_code": 200
+            }
+            
++ Response 400 (application/json)
+
+    + Body
+    
+            {
+                "success": false,
+                "message": "Invalid Parameters",
+                "status_code": 400
+            }
+
+### Update Complete Profile Details [PUT]
+
+Menambah data detail dari suatu user dengan method PUT.
+
++ Request (application/json)
+
+    + Headers
+    
+                Authorization: token
+                
+    + Body
+            
+            {
+                "id_user": 3,
+                "name": "Alice in Wonderland",
+                "address": "New York City, NY",
+                "bio": "Business Enthusiast",
+                "total_posts": 1245,
+                "id_avatar": "2",
+                "id_cover_photo": "3",
+                "categories": ["Finances", "Courses", "Facilities"],
+            }
+
++ Response 200 (application/json)
+
+        {
+            "id_user": 3,
+            "name": "Alice in Wonderland",
+            "address": "New York City, NY",
+            "bio": "Business Enthusiast",
+            "total_posts": 1245,
+            "id_avatar": "3",
+            "id_cover_photo": "4",
+            "categories": ["Finances", "Courses", "Facilities"],
+            "success": true,
+            "message": "Profile has been updated",
+            "status_code": 200
+        }
+
++ Response 400 (application/json)
+
+    + Body
+    
+            {
+                "success": false,
+                "message": "Invalid Parameters",
+                "status_code": 400
+            }
+
+### Update Partial Profile Details [PATCH]
+
+Menambah data detail dari suatu user dengan method PATCH.
+
++ Request (application/json)
+
+    + Headers
+    
+                Authorization: token
+                
+    + Body
+            
+            {
+                "name": "Patricia Lee"
+            }
+
++ Response 200 (application/json)
+
+        {
+            "id_user": 3,
+            "name": "Patricia Lee",
+            "address": "Palo Alto, CA",
+            "bio": "Fashion Enthusiast",
+            "total_posts": 892,
+            "id_avatar": "2",
+            "id_cover_photo": "1",
+            "categories": ["Finances", "Courses", "Facilities"]
+            "success": true,
+            "message": "Success",
+            "status_code": 200
+        }
+        
++ Response 400 (application/json)
+
+    + Body
+    
+            {
+                "success": false,
+                "message": "Invalid Parameters",
+                "status_code": 400
+            }
+
+## Show Specific User Posts [/v1/profile/posts]
+
+### Show All User Posts from a Specific User [GET]
+
++ Request (application/json)
+
+    + Headers
+    
+                Authorization: token
+                
+    + Body
+
+            {
+                "id_user": 098
+                
+            }
+
++ Response 200 (application/json)
+    
+    + Body
+  
+            {
+                "posts":
+                    [
+                        {
+                            "id_post": 5,
+                            "post_title": "Aku lelah",
+                            "id_background": 3,
+                            "categories": "Courses",
+                            "name": "Jeff Bezos",
+                            "id_avatar": 1,
+                            "published_at": "2015-08-05T08:40:51.620Z"
+                        },    
+                        {   
+                            "id_post": 4,
+                            "post_title": "Know Yourself Your Inner Power",
+                            "id_background": 1,
+                            "categories": "Finances",
+                            "name": "Jeff Bezos",
+                            "id_avatar": 1,
+                            "published_at": "2017-04-15T08:40:51.620Z"
+                        },
+                        {
+                            "id_post": 3,
+                            "post_title": "Know Yourself Your",
+                            "id_background": 2,
+                            "categories": "Skills",
+                            "name": "Jeff Bezos",
+                            "id_avatar": 1,
+                            "published_at": "2017-04-25T08:40:51.620Z"
+                        },
+                        {
+                            "id_post": 2,
+                            "post_title": "Yourself",
+                            "id_background": 3,
+                            "categories": "Courses",
+                            "name": "Jeff Bezos",
+                            "id_avatar": 1,
+                            "published_at": "2017-08-05T08:40:51.620Z"
+                        }
+                    ],
+                "success": true,
+                "message": "Specific user posts have been shown",
+                "status_code": 200
+            }    
+
++ Response 400 (application/json)
+
+    + Body
+    
+            {
+                "success": false,
+                "message": "Invalid Parameters",
+                "status_code": 400
+            }
+        
+## Add Categories By User [/v1/profile/categories]        
+
+### Add Categories [POST]
+
+Menambah data kategori yang diinginkan oleh pengguna.
+
++ Request (application/json)
+
+    + Headers
+    
+                Authorization: token
+                
+    + Body
+            
+            {
+                "id_user": 3,
+                "categories": ["Finances", "Courses", "Facilities"]
+            }
+
++ Response 200 (application/json)
+
+        {
+            "id_user": 3,
+            "name": "Alice in Wonderland",
+            "address": "New York City, NY",
+            "bio": "Business Enthusiast",
+            "total_posts": 1245,
+            "id_avatar": "3",
+            "id_cover_photo": "4",
+            "categories": ["Finances", "Courses", "Facilities"],
+            "success": true,
+            "message": "Profile has been updated",
+            "status_code": 200
+        }
+
++ Response 400 (application/json)
+
+    + Body
+    
+            {
+                "success": false,
+                "message": "Invalid Parameters",
+                "status_code": 400
+            }
+            
+## Group Bookmarks
+
+## Create and Get All Bookmarks Collection [/v1/bookmarks]
+
+### Add Bookmark [POST]
+
++ Request (application/json)
+
+    + Headers
+    
+                Authorization: token
+                
+    + Body
+            
+            {
+                "id_user": 13,
+                "id_post": 1234
+            }
+
++ Response 200 (application/json)
+
+        {
+            "success": true,
+            "message": "Bookmark has been added",
+            "status_code": 200
+        }
+
++ Response 400 (application/json)
+
+    + Body
+    
+            {
+                "success": false,
+                "message": "Invalid Parameters",
+                "status_code": 400
+            }
+
+### Show All Bookmarks [GET]
+
++ Request (application/json)
+
+    + Headers
+    
+                Authorization: token
+                
++ Response 200 (application/json)
+    
+        {
+            "bookmarks":
+            [
+                {
+                    "id_post": 2,
+                    "post_title": "Yourself",
+                    "id_background": 3,
+                    "categories": "Courses",
+                    "name": "Jeff Bezos",
+                    "id_avatar": 1,
+                    "published_at": "2017-08-05T08:40:51.620Z"
+                },
+                {
+                    "id_post": 5,
+                    "post_title": "Bookmarked Post Nomer 1",
+                    "id_background": 2,
+                    "categories": "Finances",
+                    "name": "Sundar Pichai",
+                    "id_avatar": 2,
+                    "published_at": "2017-04-03T08:40:51.620Z"
+                },
+                {
+                    "id_post": 7,
+                    "post_title": "Another Bookmarked Post",
+                    "id_background": 4,
+                    "categories": "Facilities",
+                    "name": "Warren Buffett",
+                    "id_avatar": 4,
+                    "published_at": "2017-09-05T08:40:51.620Z"
+                },
+                {
+                    "id_post": 9,
+                    "post_title": "Apalah Arti Diriku ",
+                    "id_background": 3,
+                    "categories": "Courses",
+                    "name": "Elon Musk",
+                    "id_avatar": 5,
+                    "published_at": "2017-07-07T08:40:51.620Z"
+                }
+            ],
+            "success": true,
+            "message": "Bookmarks have been successfully shown",
+            "status_code": 200
+        }
+
++ Response 400 (application/json)
+
+    + Body
+    
+            {
+                "success": false,
+                "message": "Invalid Parameters",
+                "status_code": 400
+            }
+            
+## Delete a Certain Bookmark Collection [/v1/bookmarks/{id_bookmark}]
+
++ Parameters
+    + id_bookmark: 1 (required, number) - ID dari bookmark dalam integer
+
+### Remove Bookmark [DELETE]
+
++ Request (application/json)
+
+    + Headers
+    
+                Authorization: token
+                
+    + Body
+            
+            {
+                "id_user": 13,
+                "id_post": 1234
+            }
+
++ Response 200 (application/json)
+
+        {
+            "success": true,
+            "message": "Bookmark has been deleted",
+            "status_code": 200
+        }
+        
++ Response 400 (application/json)
+
+    + Body
+    
+            {
+                "success": false,
+                "message": "Invalid Parameters",
+                "status_code": 400
+            }
+
+## Group Comments
+
+## Create a New Comment and Get All Comments Operation [/v1/posts/{id_post}/comments]
+
++ Parameters
+    + id_post: 1 (required, number) - ID dari post dalam integer
+
+### Create a New Comment [POST]
+
+Untuk membuat komentar baru.
+
++ Request (application/json)
+
+    + Headers
+    
+                Authorization: token
+
+    + Body
+    
+            {
+                "id_user": 3,
+                "comment_title": "Little Things Do Make A Difference"
+            }
+
++ Response 201 (application/json)
+    
+    + Headers
+
+            Location: /v1/posts/1
+
+    + Body
+
+            {
+                "id_comment":8,
+                "id_user": 3,
+                "comment_title": "Little Things Do Make A Difference",
+                "success": true,
+                "message": "Comment has been created",
+                "status_code": 200
+            }
+
++ Response 400 (application/json)
+
+    + Body
+    
+            {
+                "success": false,
+                "message": "Invalid Parameters",
+                "status_code": 400
+            }
+
+### Get All Comments [GET]
+
+Untuk menampilkan semua komentar dalam suatu post.
+
++ Request
+
+    + Headers
+    
+            Authorization: token
+
+
++ Response 200 (application/json)
+            
+            {
+                "comments":
+                    [
+                        {
+                            "id_comment":8,
+                            "id_user": 3,
+                            "comment_title": "Hello from the other side",
+                            "published_at": "2017-08-05T08:40:51.620Z"
+                        },
+                        {
+                            "id_comment":8,
+                            "id_user": 3,
+                            "comment_title": "I must have caught a thousand times",
+                            "published_at": "2017-08-05T08:40:51.620Z"
+                        },
+                        {
+                            "id_comment":8,
+                            "id_user": 3,
+                            "comment_title": "To tell you I'm sorry for everything that I've done",
+                            "published_at": "2017-08-05T08:40:51.620Z"
+                        }
+                    ],
+                "success": true,
+                "message": "Comments have been shown",
+                "status_code": 200
+            }
+
++ Response 400 (application/json)
+
+    + Body
+    
+            {
+                "success": false,
+                "message": "Invalid Parameters",
+                "status_code": 400
+            }
+
+## Read, Update, and Delete Certain Comment Operation [/v1/posts/{id_post}/comments/{id_comment}]
+
++ Parameters
+    + id_post: 1 (required, number) - ID dari post dalam integer
+    + id_comment: 1 (required, number) - ID dari komentar dalam integer
+
+### Read Comment Detail [GET]
+
+Untuk membaca komentar dengan ID tertentu.
+
++ Request
+
+    + Headers
+    
+                Authorization: token
+
++ Response 200 (application/json)
+
+        {
+            "id_comment": 1,
+            "id_user": 3,
+            "comment_title": "Ini komentarku",
+            "published_at": "2017-08-05T08:40:51.620Z"
+        }
+
++ Response 400 (application/json)
+
+    + Body
+    
+            {
+                "success": false,
+                "message": "Invalid Parameters",
+                "status_code": 400
+            }
+
+### Update Comment [PUT]
+
+Untuk update komentar dengan ID tertentu.
+
++ Request (application/json)
+
+    + Headers
+    
+                Authorization: token
+                
+    + Body
+
+            {
+                "comment_title": "Ganti aja"
+            }
+
++ Response 201 (application/json)
+
+    + Headers
+
+            Location: /v1/user_data/1
+
+    + Body
+
+            {
+                "id_comment":8,
+                "id_user": 3,
+                "comment_title": "I must have caught a thousand times",
+                "published_at": "2017-08-05T08:40:51.620Z"
+            }
+
++ Response 400 (application/json)
+
+    + Body
+    
+            {
+                "success": false,
+                "message": "Invalid Parameters",
+                "status_code": 400
+            }
+
+### Delete Comment [DELETE]
+
+Untuk menghapus komentar dengan ID tertentu.
+
++ Request
+
+    + Headers
+    
+                Authorization: token
+
++ Response 204
+
++ Response 400 (application/json)
+
+    + Body
+    
+            {
+                "success": false,
+                "message": "Invalid Parameters",
+                "status_code": 400
+            }
