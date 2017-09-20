@@ -35,6 +35,14 @@ type ResponseUsers struct {
 	UpdatedAt    time.Time `json:"updated_at"`
 }
 
+type ResponseLogin struct {
+	Message    string `json:"message"`
+	Success    bool   `json:"success"`
+	StatusCode int    `json:"status_code"`
+	Token      string `json:"token"`
+	Email      string `json:"email"`
+}
+
 type Response struct {
 	Message    string      `json:"message"`
 	Success    bool        `json:"success"`
@@ -60,14 +68,26 @@ type Categories struct {
 
 type Posts struct {
 	ID           uint      `gorm:"primary_key" json:"id_post"`
-	IDUser       uint      `json:"id_user"`
-	Address      string    `json:"address"`
-	IDAvatar     int       `json:"id_avatar"`
-	IDBackground uint      `json:"id_background"`
-	PostTitle    string    `json:"post_title"`
-	Categories   string    `json:"categories"`
-	Content      string    `json:"content"`
-	CreatedAt    time.Time `json:"published_at"`
+	IDUser       uint      `json:"id_user, omitempty"`
+	Address      string    `json:"address, omitempty"`
+	IDAvatar     int       `json:"id_avatar, omitempty"`
+	IDBackground uint      `json:"id_background, omitempty"`
+	PostTitle    string    `json:"post_title, omitempty"`
+	Categories   string    `json:"categories, omitempty"`
+	Content      string    `json:"content, omitempty"`
+	CreatedAt    time.Time `json:"published_at, omitempty"`
+}
+
+type PostsPatch struct {
+	ID           uint      `gorm:"primary_key" json:"id_post"`
+	IDUser       uint      `json:"id_user, omitempty"`
+	Address      string    `json:"address, omitempty"`
+	IDAvatar     int       `json:"id_avatar, omitempty"`
+	IDBackground uint      `json:"id_background, omitempty"`
+	PostTitle    string    `json:"post_title, omitempty"`
+	Categories   string    `json:"categories, omitempty"`
+	Content      string    `json:"content, omitempty"`
+	CreatedAt    time.Time `json:"published_at, omitempty"`
 }
 
 type PostsUsersJoin struct {

@@ -40,7 +40,7 @@ func main() {
 	}
 
 	// Kode yang dikomen untuk delete tabel
-	db.DropTable("users", "bookmarks", "posts", "categories")
+	// db.DropTable("users", "bookmarks", "posts", "categories")
 	db.AutoMigrate(&m.Users{}, &m.Bookmarks{}, &m.Posts{}, &m.Categories{})
 
 	router := gin.New()
@@ -68,16 +68,13 @@ func main() {
 				post.GET("/:id", PostDetail)
 				post.POST("/", PostCreate)
 				post.PUT("/:id", PostUpdate)
-				post.PATCH("/:id", PostUpdate)
 				post.DELETE("/:id", PostDelete)
 			}
 			usergroup := logged_in.Group("/profile")
 			{
 				usergroup.GET("/", UserGet)
 				usergroup.GET("/:id", UserDetail)
-				usergroup.POST("/", UserCreate)
 				usergroup.PUT("/:id", UserUpdate)
-				usergroup.PATCH("/:id", UserUpdate)
 				usergroup.DELETE("/:id", UserDelete)
 				usergroup.GET("/:id/posts", UserPostsGet)
 			}
@@ -204,7 +201,7 @@ func RegisterUser(c *gin.Context) {
 	response := &m.Response{
 		Success:    true,
 		StatusCode: http.StatusCreated,
-		Message:    "New User has been created",
+		Message:    "Registration successful : New User has been created",
 		Data:       registerOutput,
 	}
 
@@ -248,13 +245,12 @@ func LoginUser(c *gin.Context) {
 		db.Model(login).Update("token", login.Token)
 	}
 
-	loginOutput := login.ResponseUsers
-
-	response := &m.Response{
+	response := &m.ResponseLogin{
+		Token:      login.Token,
+		Email:      login.Email,
 		Message:    "New User has been created",
 		Success:    true,
 		StatusCode: http.StatusOK,
-		Data:       loginOutput,
 	}
 
 	c.JSON(http.StatusOK, response)
@@ -329,38 +325,6 @@ func UserDetail(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, response)
-}
-
-func UserCreate(c *gin.Context) {
-
-	user := &m.Users{}
-	err := c.BindJSON(&user)
-	if err != nil {
-		response := &m.ResponseUser{
-			Message: err.Error(),
-		}
-		c.JSON(http.StatusBadRequest, response)
-		c.Abort()
-		return
-	}
-
-	err = db.Create(user).Error
-
-	if err != nil {
-		response := &m.ResponseUser{
-			Message: err.Error(),
-		}
-		c.JSON(http.StatusBadRequest, response)
-		c.Abort()
-		return
-	}
-
-	response := &m.ResponseUser{
-		Message: "User has been created",
-		Users:   user,
-	}
-
-	c.JSON(http.StatusCreated, response)
 }
 
 func UserUpdate(c *gin.Context) {
