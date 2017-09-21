@@ -287,8 +287,10 @@ func UserGet(c *gin.Context) {
 	}
 
 	response := &m.ResponseUser{
-		Message: "Get users",
-		Users:   users,
+		Message:    "Get users : All Users have been shown",
+		Success:    true,
+		StatusCode: http.StatusOK,
+		Users:      users,
 	}
 
 	c.JSON(http.StatusOK, response)
@@ -319,9 +321,13 @@ func UserDetail(c *gin.Context) {
 		return
 	}
 
+	output := user.ResponseUsers
+
 	response := &m.ResponseUser{
-		Message: "Get user",
-		Users:   user,
+		Message:    "Get user : Certain user detail has been shown",
+		Success:    true,
+		StatusCode: http.StatusOK,
+		Users:      output,
 	}
 
 	c.JSON(http.StatusOK, response)
@@ -341,7 +347,7 @@ func UserUpdate(c *gin.Context) {
 		return
 	}
 
-	user := &m.Users{}
+	user := &m.UpdateUsers{}
 	err = c.BindJSON(&user)
 	if err != nil {
 		response := &m.ResponseUser{
@@ -353,7 +359,7 @@ func UserUpdate(c *gin.Context) {
 	}
 
 	user.ID = id
-	err = db.Save(user).Error
+	err = db.Table("users").Update(user).Error
 
 	if err != nil {
 		response := &m.ResponseUser{
@@ -490,9 +496,9 @@ func BookmarkDelete(c *gin.Context) {
 
 func PostGet(c *gin.Context) {
 
-	posts := []*m.Posts{}
-	err = db.Order("created_at desc").Find(&posts).Error
-	// err = db.Table("posts").Order("created_at desc").Joins("JOIN users on users.id = posts.id_user").Scan(&posts).Error
+	posts := []*m.PostsUsersJoin{}
+	err = db.Raw("SELECT * FROM posts join users on posts.id_user = users.id ORDER BY posts.created_at desc").Scan(&posts).Error
+	// fmt.Println(posts.ResponseUsers.IDAvatar)
 
 	if err != nil {
 		response := &m.ResponsePost{
@@ -523,21 +529,41 @@ func PostDetail(c *gin.Context) {
 		return
 	}
 
-	post := &m.Posts{}
-	err = db.Where("id = ?", id).First(&post).Error
+	authorization := c.Request.Header.Get("Authorization")
+	auth := &m.Users{}
+
+	err = db.Where("token = ? ", authorization).Find(&auth).Error
 
 	if err != nil {
 		response := &m.ResponsePost{
-			Message: err.Error(),
+			Message: "Cannot execute the query to search user based on token",
 		}
 		c.JSON(http.StatusServiceUnavailable, response)
 		c.Abort()
 		return
 	}
 
-	response := &m.ResponsePost{
+	post := &m.PostsUsersJoin{}
+	err = db.Raw("SELECT * FROM posts join users on posts.id_user = users.id WHERE posts.id = ?", id).Scan(&post).Error
+
+	if err != nil {
+		response := &m.ResponsePost{
+			Message: "Cannot execute the join query from posts and users table",
+		}
+		c.JSON(http.StatusServiceUnavailable, response)
+		c.Abort()
+		return
+	}
+
+	editMode := false
+	if auth.ID == post.IDUser {
+		editMode = true
+	}
+
+	response := &m.ResponseDetailPost{
 		post,
 		"Post has been obtained",
+		editMode,
 		m.SuccessStatus{true, 200},
 	}
 
@@ -608,6 +634,23 @@ func PostUpdate(c *gin.Context) {
 		return
 	}
 
+	authorization := c.Request.Header.Get("Authorization")
+	auth := &m.Users{}
+	checkuserID := &m.Posts{}
+
+	err = db.Where("token = ? ", authorization).Find(&auth).Error
+	err = db.Where("id = ?", id).Find(&checkuserID).Error
+
+	if checkuserID.IDUser != auth.ID {
+		response := &m.ResponsePost{
+			Message: "Error : Cannot change other people posts",
+		}
+		c.JSON(http.StatusBadRequest, response)
+		c.Abort()
+		return
+	}
+
+	post.IDUser = auth.ID
 	post.ID = id
 	err = db.Save(post).Error
 
@@ -685,7 +728,7 @@ func CategoryCreate(c *gin.Context) {
 	}
 
 	response := &m.ResponseCategory{
-		Message:    "Post has been created",
+		Message:    "Category has been created",
 		Categories: category,
 	}
 
@@ -707,7 +750,7 @@ func CategoryGet(c *gin.Context) {
 	}
 
 	response := &m.ResponseCategory{
-		Message:    "Get categories",
+		Message:    "Categories have been shown",
 		Categories: categories,
 	}
 
