@@ -422,6 +422,25 @@ func BookmarkCreate(c *gin.Context) {
 		return
 	}
 
+	authorization := c.Request.Header.Get("Authorization")
+	auth := &m.Users{}
+	err = db.Where("token = ? ", authorization).Find(&auth).Error
+
+	bookmarks.IDUser = auth.ID
+
+	checkExistingBookmark := db.Table("bookmarks").Where("id_user = ? AND id_post = ? ", bookmarks.IDUser, bookmarks.IDPost).Select("id_user").Row()
+	var id_user string
+	checkExistingBookmark.Scan(&id_user)
+
+	if id_user != "" {
+		response := &m.ResponseBookmark{
+			Message: "Error : This user has bookmarked this post",
+		}
+		c.JSON(http.StatusBadRequest, response)
+		c.Abort()
+		return
+	}
+
 	err = db.Create(bookmarks).Error
 
 	if err != nil {
@@ -476,11 +495,15 @@ func BookmarkDelete(c *gin.Context) {
 		return
 	}
 
-	err = db.Where("id = ?", id).Delete(&m.Bookmarks{}).Error
+	authorization := c.Request.Header.Get("Authorization")
+	auth := &m.Users{}
+	db.Where("token = ? ", authorization).Find(&auth)
 
-	if err != nil {
+	checkDeleteBookmark := db.Where("id = ? AND id_user = ?", id, auth.ID).Delete(&m.Bookmarks{}).RowsAffected
+
+	if checkDeleteBookmark == 0 {
 		response := &m.ResponseBookmark{
-			Message: err.Error(),
+			Message: "Error : Either the bookmark you want to delete does not exist or you do not have enough authorization to delete other people bookmark",
 		}
 		c.JSON(http.StatusServiceUnavailable, response)
 		c.Abort()
