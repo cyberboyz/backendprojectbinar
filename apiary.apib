@@ -542,7 +542,7 @@ Menampilkan data detail dari suatu user.
 
 ### Update Complete Profile Details [PUT]
 
-Menambah data detail dari suatu user dengan method PUT.
+Mengubah data detail dari suatu user dengan method PUT.
 
 + Request (application/json)
 
@@ -591,7 +591,7 @@ Menambah data detail dari suatu user dengan method PUT.
 
 ### Update Partial Profile Details [PATCH]
 
-Menambah data detail dari suatu user dengan method PATCH.
+Mengubah beberapa data detail dari suatu user dengan method PATCH.
 
 + Request (application/json)
 
@@ -631,7 +631,32 @@ Menambah data detail dari suatu user dengan method PATCH.
                 "status_code": 400
             }
 
-## Show Specific User Posts [/v1/profile/posts]
+### Delete Profile [DELETE]
+
+Untuk menghapus user beserta datanya dengan ID tertentu.
+
++ Request
+
+    + Headers
+    
+                Authorization: token
+
++ Response 204
+
++ Response 400 (application/json)
+
+    + Body
+    
+            {
+                "success": false,
+                "message": "Invalid Parameters",
+                "status_code": 400
+            }
+
+## Show Specific User Posts [/v1/profile/{id_user}/posts]
+
++ Parameters
+    + id_user: 1 (required, number) - ID dari user yang akan kita lihat post-nya
 
 ### Show All User Posts from a Specific User [GET]
 
@@ -641,13 +666,6 @@ Menambah data detail dari suatu user dengan method PATCH.
     
                 Authorization: token
                 
-    + Body
-
-            {
-                "id_user": 098
-                
-            }
-
 + Response 200 (application/json)
     
     + Body
