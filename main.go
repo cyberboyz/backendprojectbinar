@@ -200,7 +200,7 @@ func RegisterUser(c *gin.Context) {
 
 	if err != nil {
 		response := &m.Response{
-			Success:    true,
+			Success:    false,
 			StatusCode: http.StatusCreated,
 			Message:    "Error : Email has already been registered",
 		}
