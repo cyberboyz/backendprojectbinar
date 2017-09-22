@@ -1,10 +1,6 @@
 package models
 
 import (
-	"fmt"
-	"github.com/jinzhu/gorm"
-	_ "github.com/lib/pq"
-	"os"
 	"time"
 )
 
@@ -91,6 +87,12 @@ type UsersCategories struct {
 	ID         uint   `gorm:"primary_key" json:"id"`
 	IDUser     uint   `json:"id_user, omitempty"`
 	Categories string `json:"categories"`
+}
+
+type InputUsersCategories struct {
+	ID         uint     `gorm:"primary_key" json:"id"`
+	IDUser     uint     `json:"id_user, omitempty"`
+	Categories []string `json:"categories"`
 }
 
 type Posts struct {
@@ -192,29 +194,4 @@ type ResponseCategory struct {
 	Message    string      `json:"message"`
 	Success    bool        `json:"success"`
 	StatusCode int         `json:"status_code"`
-}
-
-var db *gorm.DB
-var err error
-
-func init() {
-
-	db_url := os.Getenv("DATABASE_URL")
-	if db_url == "" {
-		db_url = "host=localhost user=postgres dbname=gorm sslmode=disable password=postgres"
-	}
-
-	db, err = gorm.Open("postgres", db_url)
-
-	db.SingularTable(true)
-
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	// Kode yang dikomen untuk delete tabel
-	// db.DropTable("users", "bookmarks", "posts", "categories")
-	// db.AutoMigrate(&m.Users{}, &m.Bookmarks{}, &m.Posts{}, &m.Categories{})
-	db.AutoMigrate(&Users{}, &Bookmarks{}, &Posts{}, &Categories{}, &UsersCategories{})
-
 }

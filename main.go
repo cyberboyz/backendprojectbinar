@@ -21,10 +21,6 @@ var db *gorm.DB
 var err error
 
 func main() {
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
 
 	db_url := os.Getenv("DATABASE_URL")
 	if db_url == "" {
@@ -43,6 +39,11 @@ func main() {
 	// db.DropTable("users", "bookmarks", "posts", "categories")
 	// db.AutoMigrate(&m.Users{}, &m.Bookmarks{}, &m.Posts{}, &m.Categories{})
 	db.AutoMigrate(&m.Users{}, &m.Bookmarks{}, &m.Posts{}, &m.Categories{}, &m.UsersCategories{})
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
 
 	router := gin.New()
 
@@ -63,6 +64,7 @@ func main() {
 		{
 			logged_in.GET("/logout/", LogoutUser)
 			logged_in.GET("/ownprofile", ShowOwnProfile)
+			logged_in.GET("/ownposts", ShowOwnPosts).Use(AuthorizeMiddleware)
 			post := logged_in.Group("/posts")
 			{
 				post.GET("/", PostGet)
@@ -999,7 +1001,9 @@ func UserPostsGet(c *gin.Context) {
 func AddCategoriesByUser(c *gin.Context) {
 
 	categoriesByUser := &m.UsersCategories{}
-	err := c.BindJSON(&categoriesByUser)
+
+	inputCategoriesByUser := &m.InputUsersCategories{}
+	err := c.BindJSON(&inputCategoriesByUser)
 
 	if err != nil {
 		response := &m.ResponseAddCategories{
@@ -1014,35 +1018,55 @@ func AddCategoriesByUser(c *gin.Context) {
 	auth := &m.Users{}
 	err = db.Where("token = ? ", authorization).Find(&auth).Error
 
+	inputCategoriesByUser.IDUser = auth.ID
 	categoriesByUser.IDUser = auth.ID
+	// var id_user string
 
-	var id_user string
-	db.Table("users_categories").Where("id_user = ? AND categories = ? ", categoriesByUser.IDUser, categoriesByUser.Categories).Select("id_user").Row().Scan(&id_user)
+	// for _, element := range inputCategoriesByUser.Categories {
+	// 	fmt.Println(categoriesByUser.IDUser)
+	// 	fmt.Println(element)
+	// 	checkExist := db.Table("users_categories").Where("id_user = ? AND categories = ? ", categoriesByUser.IDUser, element).Select("id_user").Row().RowsAffected
+	// 	categoriesByUser.Categories = element
+	// 	fmt.Println(checkExist)
+	// 	if checkExist == 0 {
+	// 		db.Create(&categoriesByUser)
+	// 	}
+	// }
 
-	if id_user != "" {
-		response := &m.ResponseAddCategories{
-			Message: "Error : This user has chosen these categories",
-		}
-		c.JSON(http.StatusBadRequest, response)
-		c.Abort()
-		return
-	}
+	// response := &m.ResponseAddCategories{
+	// 	UsersCategories: categoriesByUser,
+	// 	Message:         "New categories have been added for this user",
+	// }
 
-	err = db.Create(categoriesByUser).Error
+	// c.JSON(http.StatusCreated, response)
+}
+
+func ShowOwnPosts(c *gin.Context) {
+	authorization := c.Request.Header.Get("Authorization")
+	auth := &m.Users{}
+	err = db.Where("token = ? ", authorization).Find(&auth).Error
+
+	id := auth.ID
+
+	posts := []*m.Posts{}
+	err = db.Order("created_at desc").Where("id_user = ?", id).Find(&posts).Error
+	// err = db.Table("posts").Order("created_at desc").Joins("JOIN users on users.id = posts.id_user").Scan(&posts).Error
 
 	if err != nil {
-		response := &m.ResponseAddCategories{
+		response := &m.ResponsePost{
 			Message: err.Error(),
 		}
-		c.JSON(http.StatusBadRequest, response)
+		c.JSON(http.StatusServiceUnavailable, response)
 		c.Abort()
 		return
 	}
 
-	response := &m.ResponseAddCategories{
-		UsersCategories: categoriesByUser,
-		Message:         "New categories have been added for this user",
+	response := &m.ResponsePost{
+		posts,
+		"Get posts",
+		true,
+		200,
 	}
 
-	c.JSON(http.StatusCreated, response)
+	c.JSON(http.StatusOK, response)
 }
