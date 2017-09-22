@@ -186,13 +186,6 @@ Untuk menampilkan semua postingan ke timeline Feeds. Feeds yang ditampilkan berg
     + Headers
     
             Authorization: token
-            
-    + Body
-    
-            {
-                "id_user": 4
-            }
-
 
 + Response 200 (application/json)
             
@@ -416,7 +409,10 @@ Untuk menghapus post dengan ID tertentu.
             }
 
 
-## List All Posts Based on Categories [/v1/categories/showposts]
+## List All Posts Based on Categories [/v1/categories/{categories}]
+
++ Parameters
+    + categories: Courses (required, string) - Nama categories yang ingin dicari post-nya
 
 ### Show All Posts Based on One or Several Categories [GET]
 
@@ -425,12 +421,6 @@ Untuk menghapus post dengan ID tertentu.
     + Headers
     
                 Authorization: token
-
-    + Body
-    
-            {
-                "categories": "Courses"
-            }
             
 + Response 200 (application/json)
 
@@ -502,7 +492,121 @@ Untuk menghapus post dengan ID tertentu.
 
 ## Group Profile
 
-## User Profile [/v1/profile]
+## Users Profile [/v1/profile/]
+
+### Show All Profile [GET]
+
+Menampilkan data dari seluruh pengguna.
+
++ Request (application/json)
+
+    + Headers
+    
+                Authorization: token
+
++ Response 200 (application/json)
+
+            {
+                "users":
+                    [
+                        {
+                            "id_user": 1,
+                            "name": "Barack Obama",
+                            "address": "USA",
+                            "bio": "President of the USA",
+                            "total_posts": 666,
+                            "id_avatar": 4,
+                            "id_cover_photo": 5,
+                            "categories": ["Courses", "Facilities"]
+                        },
+                        {
+                            "id_user": 2,
+                            "name": "George Bush",
+                            "address": "Somewhere",
+                            "bio": "I'm the boss",
+                            "total_posts": 123,
+                            "id_avatar": 1,
+                            "id_cover_photo": 1,
+                            "categories": ["Finances"]
+                        },
+                        {
+                            "id_user": 3,
+                            "name": "Hillary Clinton",
+                            "address": "...",
+                            "bio": "I'm a woman",
+                            "total_posts": 888,
+                            "id_avatar": 5,
+                            "id_cover_photo": 5,
+                            "categories": ["Facilities"]
+                        },
+                        {
+                            "id_user": 4,
+                            "name": "Trump",
+                            "address": "White House",
+                            "bio": "Huge",
+                            "total_posts": 111,
+                            "id_avatar": 4,
+                            "id_cover_photo": 2,
+                            "categories": ["Courses"]
+                        }
+                    ],
+                "success": true,
+                "message": "Success",
+                "status_code": 200
+            }
+            
++ Response 400 (application/json)
+
+    + Body
+    
+            {
+                "success": false,
+                "message": "Invalid Parameters",
+                "status_code": 400
+            }
+
+## Show Your Own Profile [/v1/ownprofile]
+
+### Show Your Own Profile Detail [GET]
+
+Menampilkan profile sendiri berdasarkan autentikasi token.
+
++ Request (application/json)
+
+    + Headers
+    
+                Authorization: token
+
++ Response 200 (application/json)
+
+            {
+                "id_user": 5,
+                "name": "Me",
+                "address": "My Home",
+                "bio": "My Bio",
+                "total_posts": 999,
+                "id_avatar": 1,
+                "id_cover_photo": 1,
+                "categories": ["Kategori Ku", "Aku", "Saya"],
+                "success": true,
+                "message": "Success",
+                "status_code": 200
+            }
+            
++ Response 400 (application/json)
+
+    + Body
+    
+            {
+                "success": false,
+                "message": "Invalid Parameters",
+                "status_code": 400
+            }
+
+## User Profile [/v1/profile/{id_profile}]
+
++ Parameters
+    + id_profile: 3 (required, number) - ID dari profile/user
 
 ### Show Profile Details [GET]
 
@@ -553,7 +657,6 @@ Menambah data detail dari suatu user dengan method PUT.
     + Body
             
             {
-                "id_user": 3,
                 "name": "Alice in Wonderland",
                 "address": "New York City, NY",
                 "bio": "Business Enthusiast",
@@ -631,7 +734,10 @@ Menambah data detail dari suatu user dengan method PATCH.
                 "status_code": 400
             }
 
-## Show Specific User Posts [/v1/profile/posts]
+## Show Specific User Posts [/v1/profile/{id_profile}/posts]
+
++ Parameters
+    + id_profile: 3 (required, number) - ID dari user yang ingin kita ambil posts-nya
 
 ### Show All User Posts from a Specific User [GET]
 
@@ -640,13 +746,6 @@ Menambah data detail dari suatu user dengan method PATCH.
     + Headers
     
                 Authorization: token
-                
-    + Body
-
-            {
-                "id_user": 098
-                
-            }
 
 + Response 200 (application/json)
     
@@ -722,7 +821,6 @@ Menambah data kategori yang diinginkan oleh pengguna.
     + Body
             
             {
-                "id_user": 3,
                 "categories": ["Finances", "Courses", "Facilities"]
             }
 
@@ -927,7 +1025,10 @@ Untuk membuat komentar baru.
             {
                 "id_comment":8,
                 "id_user": 3,
+                "name": "Elon Musk",
+                "id_avatar": 5,
                 "comment_title": "Little Things Do Make A Difference",
+                "published_at": "2017-07-07T08:40:51.620Z",
                 "success": true,
                 "message": "Comment has been created",
                 "status_code": 200
@@ -962,18 +1063,24 @@ Untuk menampilkan semua komentar dalam suatu post.
                         {
                             "id_comment":8,
                             "id_user": 3,
+                            "name": "Elon Musk",
+                            "id_avatar": 5,
                             "comment_title": "Hello from the other side",
                             "published_at": "2017-08-05T08:40:51.620Z"
                         },
                         {
                             "id_comment":8,
                             "id_user": 3,
+                            "name": "Elon Musk",
+                            "id_avatar": 5,
                             "comment_title": "I must have caught a thousand times",
                             "published_at": "2017-08-05T08:40:51.620Z"
                         },
                         {
                             "id_comment":8,
                             "id_user": 3,
+                            "name": "Elon Musk",
+                            "id_avatar": 5,
                             "comment_title": "To tell you I'm sorry for everything that I've done",
                             "published_at": "2017-08-05T08:40:51.620Z"
                         }
@@ -1014,6 +1121,8 @@ Untuk membaca komentar dengan ID tertentu.
         {
             "id_comment": 1,
             "id_user": 3,
+            "name": "Someone",
+            "id_avatar": 2,
             "comment_title": "Ini komentarku",
             "published_at": "2017-08-05T08:40:51.620Z"
         }
@@ -1055,7 +1164,9 @@ Untuk update komentar dengan ID tertentu.
             {
                 "id_comment":8,
                 "id_user": 3,
-                "comment_title": "I must have caught a thousand times",
+                "name": "Elon Musk",
+                "id_avatar": 5,
+                "comment_title": "Ganti aja",
                 "published_at": "2017-08-05T08:40:51.620Z"
             }
 
