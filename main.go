@@ -96,9 +96,9 @@ func main() {
 			}
 			category := logged_in.Group("/categories")
 			{
+				category.GET("/:id", CategoryPostsList)
 				category.POST("/", CategoryCreate).Use(AuthorizeMiddleware)
 				category.GET("/", CategoryGet).Use(AuthorizeMiddleware)
-				category.GET("/:id", CategoryPostsList)
 			}
 		}
 	}
