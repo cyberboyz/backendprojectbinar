@@ -199,8 +199,10 @@ func RegisterUser(c *gin.Context) {
 	err = db.Create(register).Error
 
 	if err != nil {
-		response := &m.ResponseAuth{
-			Message: "Error : Email has already been registered",
+		response := &m.Response{
+			Success:    true,
+			StatusCode: http.StatusCreated,
+			Message:    "Error : Email has already been registered",
 		}
 		c.JSON(http.StatusOK, response)
 		c.Abort()
