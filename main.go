@@ -71,6 +71,14 @@ func main() {
 				post.POST("/", PostCreate)
 				post.PUT("/:id", PostUpdate)
 				post.DELETE("/:id", PostDelete)
+				// comment := post.Group("/comments")
+				// {
+				// 	comment.GET("/", CommentGet)
+				// 	comment.GET("/:id", CommentDetail)
+				// 	comment.POST("/", CommentCreate)
+				// 	comment.PUT("/:id", CommentUpdate)
+				// 	comment.DELETE("/:id", CommentDelete)
+				// }
 			}
 			usergroup := logged_in.Group("/profile")
 			{
@@ -303,6 +311,27 @@ func UserGet(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, response)
+
+	// categories := []*m.Categories{}
+	// db.Raw("SELECT categories from users_categories where id_user = ?", element.ResponseUsers.ID).Scan(&categories)
+
+	// if err != nil {
+	// 	response := &m.ResponseCategory{
+	// 		Message: err.Error(),
+	// 	}
+	// 	c.JSON(http.StatusServiceUnavailable, response)
+	// 	c.Abort()
+	// 	return
+	// }
+
+	// response := &m.ResponseCategory{
+	// 	Message:    "Categories have been shown",
+	// 	Success:    true,
+	// 	StatusCode: http.StatusOK,
+	// 	Categories: categories,
+	// }
+
+	// c.JSON(http.StatusOK, response)
 }
 
 func UserDetail(c *gin.Context) {
@@ -336,11 +365,11 @@ func UserDetail(c *gin.Context) {
 	output := user.ResponseUsers
 	output.TotalPosts = total_post
 
-	response := &m.ResponseUser{
-		Message:    "Get user : Certain user detail has been shown",
-		Success:    true,
-		StatusCode: http.StatusOK,
-		Users:      output,
+	response := &m.ResponseUserDetail{
+		Message:       "Get user : Certain user detail has been shown",
+		Success:       true,
+		StatusCode:    http.StatusOK,
+		ResponseUsers: output,
 	}
 
 	c.JSON(http.StatusOK, response)
@@ -352,7 +381,7 @@ func UserUpdate(c *gin.Context) {
 	id64, err := strconv.ParseUint(idStr, 10, 64)
 	id := uint(id64)
 	if err != nil {
-		response := &m.ResponseUser{
+		response := &m.SuccessStatus{
 			Message: err.Error(),
 		}
 		c.JSON(http.StatusBadRequest, response)
@@ -363,7 +392,7 @@ func UserUpdate(c *gin.Context) {
 	user := &m.UpdateUsers{}
 	err = c.BindJSON(&user)
 	if err != nil {
-		response := &m.ResponseUser{
+		response := &m.SuccessStatus{
 			Message: err.Error(),
 		}
 		c.JSON(http.StatusBadRequest, response)
@@ -371,11 +400,10 @@ func UserUpdate(c *gin.Context) {
 		return
 	}
 
-	user.ID = id
-	err = db.Table("users").Update(user).Error
+	err = db.Table("users").Where("id = ?", id).Update(user).Error
 
 	if err != nil {
-		response := &m.ResponseUser{
+		response := &m.SuccessStatus{
 			Message: err.Error(),
 		}
 		c.JSON(http.StatusBadRequest, response)
@@ -383,9 +411,11 @@ func UserUpdate(c *gin.Context) {
 		return
 	}
 
-	response := &m.ResponseUser{
-		Message: "User has been updated",
-		Users:   user,
+	response := &m.ResponseUserUpdate{
+		Message:     "User has been updated",
+		Success:     true,
+		StatusCode:  http.StatusOK,
+		UpdateUsers: user,
 	}
 
 	c.JSON(http.StatusOK, response)
@@ -579,7 +609,7 @@ func PostGet(c *gin.Context) {
 	}
 
 	response := &m.ResponsePost{
-		posts, "Get posts", m.SuccessStatus{true, 200},
+		posts, "Get posts", true, 200,
 	}
 
 	c.JSON(http.StatusOK, response)
@@ -622,9 +652,10 @@ func PostDetail(c *gin.Context) {
 
 	response := &m.ResponseDetailPost{
 		post,
-		"Post has been obtained",
 		editMode,
-		m.SuccessStatus{true, 200},
+		"Post has been obtained",
+		true,
+		200,
 	}
 
 	c.JSON(http.StatusOK, response)
@@ -663,7 +694,8 @@ func PostCreate(c *gin.Context) {
 	response := &m.ResponsePost{
 		post,
 		"Post has been created",
-		m.SuccessStatus{true, 200},
+		true,
+		200,
 	}
 
 	c.JSON(http.StatusCreated, response)
@@ -702,7 +734,6 @@ func PostUpdate(c *gin.Context) {
 
 	err = db.Where("id = ?", id).Find(&checkuserID).Error
 
-	fmt.Println(checkuserID.IDUser)
 	if checkuserID.IDUser == 0 {
 		response := &m.ResponsePost{
 			Message: "Error : The post does not exist",
@@ -752,9 +783,10 @@ func PostUpdate(c *gin.Context) {
 
 	response := &m.ResponseDetailPost{
 		postusers,
-		"Post has been updated",
 		editMode,
-		m.SuccessStatus{true, 200},
+		"Post has been updated",
+		true,
+		200,
 	}
 
 	c.JSON(http.StatusOK, response)
@@ -785,7 +817,9 @@ func PostDelete(c *gin.Context) {
 	}
 
 	response := &m.ResponsePost{
-		Message: "Post has been deleted",
+		Message:    "Post has been deleted",
+		Success:    true,
+		StatusCode: http.StatusOK,
 	}
 
 	c.JSON(http.StatusOK, response)
@@ -817,6 +851,8 @@ func CategoryCreate(c *gin.Context) {
 
 	response := &m.ResponseCategory{
 		Message:    "Category has been created",
+		Success:    true,
+		StatusCode: http.StatusOK,
 		Categories: category,
 	}
 
@@ -839,6 +875,8 @@ func CategoryGet(c *gin.Context) {
 
 	response := &m.ResponseCategory{
 		Message:    "Categories have been shown",
+		Success:    true,
+		StatusCode: http.StatusOK,
 		Categories: categories,
 	}
 
@@ -849,8 +887,8 @@ func CategoryPostsList(c *gin.Context) {
 
 	id := c.Param("id")
 
-	posts := []*m.Posts{}
-	err = db.Where("categories = ?", id).Find(&posts).Error
+	posts := []*m.PostsUsersJoin{}
+	err = db.Raw("SELECT * FROM posts join users on posts.id_user = users.id WHERE posts.categories = ? ORDER BY posts.created_at desc", id).Scan(&posts).Error
 
 	if err != nil {
 		response := &m.ResponsePost{
@@ -862,8 +900,7 @@ func CategoryPostsList(c *gin.Context) {
 	}
 
 	response := &m.ResponsePost{
-		Message: "Get posts by category",
-		Posts:   posts,
+		posts, "Posts based on categories have been shown", true, 200,
 	}
 
 	c.JSON(http.StatusOK, response)
@@ -896,7 +933,10 @@ func UserPostsGet(c *gin.Context) {
 	}
 
 	response := &m.ResponsePost{
-		posts, "Get posts", m.SuccessStatus{true, 200},
+		posts,
+		"Get posts",
+		true,
+		200,
 	}
 
 	c.JSON(http.StatusOK, response)
@@ -924,8 +964,6 @@ func AddCategoriesByUser(c *gin.Context) {
 
 	var id_user string
 	db.Table("users_categories").Where("id_user = ? AND categories = ? ", categoriesByUser.IDUser, categoriesByUser.Categories).Select("id_user").Row().Scan(&id_user)
-	// var id_user string
-	// db.Table("bookmarks").Where("id_user = ? AND id_post = ? ", bookmarks.IDUser, bookmarks.IDPost).Select("id_user").Row().Scan(&id_user)
 
 	if id_user != "" {
 		response := &m.ResponseAddCategories{

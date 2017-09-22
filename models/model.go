@@ -15,8 +15,9 @@ type Users struct {
 }
 
 type SuccessStatus struct {
-	Success    bool `json:"success"`
-	StatusCode int  `json:"status_code"`
+	Message    string `json:"message"`
+	Success    bool   `json:"success"`
+	StatusCode int    `json:"status_code"`
 }
 
 type ResponseUsersSignUp struct {
@@ -37,7 +38,8 @@ type ResponseUsers struct {
 }
 
 type UpdateUsers struct {
-	ResponseUsersSignUp
+	Email        string `json:"email"`
+	Name         string `json:"name"`
 	Address      string `json:"address"`
 	Bio          string `json:"bio"`
 	IDAvatar     uint   `json:"id_avatar"`
@@ -127,6 +129,20 @@ type ResponseUser struct {
 	Users      interface{} `json:"users, omitempty"`
 }
 
+type ResponseUserDetail struct {
+	Message    string `json:"message"`
+	Success    bool   `json:"success"`
+	StatusCode int    `json:"status_code"`
+	ResponseUsers
+}
+
+type ResponseUserUpdate struct {
+	Message    string `json:"message"`
+	Success    bool   `json:"success"`
+	StatusCode int    `json:"status_code"`
+	*UpdateUsers
+}
+
 type ResponseUserGet struct {
 	Message    string `json:"message"`
 	Success    bool   `json:"success"`
@@ -150,27 +166,32 @@ type ResponseAddCategories struct {
 }
 
 type ResponsePost struct {
-	Posts   interface{} `json:"posts, omitempty"`
-	Message string      `json:"message"`
-	SuccessStatus
+	Posts      interface{} `json:"posts, omitempty"`
+	Message    string      `json:"message"`
+	Success    bool        `json:"success"`
+	StatusCode int         `json:"status_code"`
 }
 
 type ResponsePostUpdate struct {
 	*Posts
-	Message string `json:"message"`
-	SuccessStatus
+	Message    string `json:"message"`
+	Success    bool   `json:"success"`
+	StatusCode int    `json:"status_code"`
 }
 
 type ResponseDetailPost struct {
 	*PostsUsersJoin
-	Message  string `json:"message"`
-	EditMode bool   `json:"edit_mode"`
-	SuccessStatus
+	EditMode   bool   `json:"edit_mode"`
+	Message    string `json:"message"`
+	Success    bool   `json:"success"`
+	StatusCode int    `json:"status_code"`
 }
 
 type ResponseCategory struct {
 	Categories interface{} `json:"categories, omitempty"`
 	Message    string      `json:"message"`
+	Success    bool        `json:"success"`
+	StatusCode int         `json:"status_code"`
 }
 
 var db *gorm.DB
