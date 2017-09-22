@@ -200,9 +200,9 @@ func RegisterUser(c *gin.Context) {
 
 	if err != nil {
 		response := &m.ResponseAuth{
-			Message: err.Error(),
+			Message: "Error : Email has already been registered",
 		}
-		c.JSON(http.StatusBadRequest, response)
+		c.JSON(http.StatusOK, response)
 		c.Abort()
 		return
 	}
@@ -539,7 +539,10 @@ func BookmarkCreate(c *gin.Context) {
 func BookmarkGet(c *gin.Context) {
 
 	bookmarks := []*m.Bookmarks{}
-	err = db.Find(&bookmarks).Error
+
+	authorization := c.Request.Header.Get("Authorization")
+	auth := &m.Users{}
+	err = db.Where("token = ? ", authorization).Find(&auth).Error
 
 	if err != nil {
 		response := &m.ResponseBookmark{
@@ -550,9 +553,34 @@ func BookmarkGet(c *gin.Context) {
 		return
 	}
 
-	response := &m.ResponseBookmark{
-		Message:   "Get bookmarks",
-		Bookmarks: bookmarks,
+	err = db.Where("id_user = ?", auth.ID).Find(&bookmarks).Error
+
+	if err != nil {
+		response := &m.ResponseBookmark{
+			Message: err.Error(),
+		}
+		c.JSON(http.StatusServiceUnavailable, response)
+		c.Abort()
+		return
+	}
+
+	posts := &m.PostsUsersJoin{}
+	outputBookmark := []*m.PostsUsersJoin{}
+
+	// for _, element := range bookmarks {
+	// 	db.Raw("SELECT * FROM posts join users on posts.id_user = users.id WHERE posts.id = ? ORDER BY posts.created_at desc", element.IDPost).Scan(&posts)
+	// 	fmt.Println(element.IDPost)
+	// 	fmt.Println(posts.PostTitle)
+	// 	outputBookmark = append(outputBookmark, posts)
+	// }
+
+	db.Raw("SELECT * FROM posts join users on posts.id_user = users.id WHERE posts.id = ? ORDER BY posts.created_at desc", element.IDPost).Scan(&posts)
+
+	response := &m.ResponsePost{
+		outputBookmark,
+		"Get posts",
+		true,
+		200,
 	}
 
 	c.JSON(http.StatusOK, response)

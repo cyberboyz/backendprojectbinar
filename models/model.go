@@ -8,22 +8,22 @@ import (
 	"time"
 )
 
-type Users struct {
-	ResponseUsers
-	Token    string `json:"token"`
-	Password string `json:"password"`
-}
-
 type SuccessStatus struct {
 	Message    string `json:"message"`
 	Success    bool   `json:"success"`
 	StatusCode int    `json:"status_code"`
 }
 
+type Users struct {
+	ResponseUsers
+	Token    string `json:"token" form:"token"`
+	Password string `json:"password" form:"password"`
+}
+
 type ResponseUsersSignUp struct {
-	ID    uint   `gorm:"primary_key" json:"id_user"`
-	Email string `gorm:"unique_index" json:"email"`
-	Name  string `json:"name"`
+	ID    uint   `gorm:"primary_key" json:"id_user" form:"id_user"`
+	Email string `gorm:"unique_index" json:"email" form:"email"`
+	Name  string `json:"name" form:"name"`
 }
 
 type ResponseUsers struct {
@@ -212,6 +212,9 @@ func init() {
 		fmt.Println(err)
 	}
 
-	db.AutoMigrate(&Users{}, &Bookmarks{}, &Posts{}, &Categories{})
+	// Kode yang dikomen untuk delete tabel
+	// db.DropTable("users", "bookmarks", "posts", "categories")
+	// db.AutoMigrate(&m.Users{}, &m.Bookmarks{}, &m.Posts{}, &m.Categories{})
+	db.AutoMigrate(&Users{}, &Bookmarks{}, &Posts{}, &Categories{}, &UsersCategories{})
 
 }
