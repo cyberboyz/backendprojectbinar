@@ -264,7 +264,7 @@ func LoginUser(c *gin.Context) {
 	response := &m.ResponseLogin{
 		Token:      login.Token,
 		Email:      login.Email,
-		Message:    "New User has been created",
+		Message:    "Login Successful : User has been logged in",
 		Success:    true,
 		StatusCode: http.StatusOK,
 	}
@@ -585,9 +585,9 @@ func BookmarkGet(c *gin.Context) {
 
 	if err != nil {
 		response := &m.ResponseBookmark{
-			Message: err.Error(),
+			Message: "This user has not bookmarked any posts",
 		}
-		c.JSON(http.StatusServiceUnavailable, response)
+		c.JSON(http.StatusOK, response)
 		c.Abort()
 		return
 	}
@@ -1000,8 +1000,6 @@ func UserPostsGet(c *gin.Context) {
 
 func AddCategoriesByUser(c *gin.Context) {
 
-	categoriesByUser := &m.UsersCategories{}
-
 	inputCategoriesByUser := &m.InputUsersCategories{}
 	err := c.BindJSON(&inputCategoriesByUser)
 
@@ -1019,26 +1017,28 @@ func AddCategoriesByUser(c *gin.Context) {
 	err = db.Where("token = ? ", authorization).Find(&auth).Error
 
 	inputCategoriesByUser.IDUser = auth.ID
-	categoriesByUser.IDUser = auth.ID
 	// var id_user string
 
-	// for _, element := range inputCategoriesByUser.Categories {
-	// 	fmt.Println(categoriesByUser.IDUser)
-	// 	fmt.Println(element)
-	// 	checkExist := db.Table("users_categories").Where("id_user = ? AND categories = ? ", categoriesByUser.IDUser, element).Select("id_user").Row().RowsAffected
-	// 	categoriesByUser.Categories = element
-	// 	fmt.Println(checkExist)
-	// 	if checkExist == 0 {
-	// 		db.Create(&categoriesByUser)
-	// 	}
-	// }
+	for _, element := range inputCategoriesByUser.Categories {
+		categoriesByUser := &m.UsersCategories{}
+		categoriesByUser.IDUser = auth.ID
+		fmt.Println(categoriesByUser.IDUser)
+		fmt.Println(element)
+		checkExist := db.Table("users_categories").Where("id_user = ? AND categories = ? ", categoriesByUser.IDUser, element).Select("id_user").RowsAffected
 
-	// response := &m.ResponseAddCategories{
-	// 	UsersCategories: categoriesByUser,
-	// 	Message:         "New categories have been added for this user",
-	// }
+		categoriesByUser.Categories = element
+		fmt.Println(checkExist)
+		if checkExist == 0 {
+			db.Save(&categoriesByUser)
+		}
+	}
 
-	// c.JSON(http.StatusCreated, response)
+	response := &m.ResponseAddCategories{
+		InputUsersCategories: inputCategoriesByUser,
+		Message:              "New categories have been added for this user",
+	}
+
+	c.JSON(http.StatusCreated, response)
 }
 
 func ShowOwnPosts(c *gin.Context) {

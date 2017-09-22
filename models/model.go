@@ -163,7 +163,7 @@ type ResponseBookmark struct {
 }
 
 type ResponseAddCategories struct {
-	*UsersCategories
+	*InputUsersCategories
 	Message string `json:"message"`
 }
 
