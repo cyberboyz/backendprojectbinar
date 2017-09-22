@@ -564,7 +564,7 @@ func BookmarkGet(c *gin.Context) {
 		return
 	}
 
-	posts := &m.PostsUsersJoin{}
+	// posts := &m.PostsUsersJoin{}
 	outputBookmark := []*m.PostsUsersJoin{}
 
 	// for _, element := range bookmarks {
