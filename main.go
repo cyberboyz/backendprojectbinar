@@ -196,6 +196,8 @@ func RegisterUser(c *gin.Context) {
 		return
 	}
 
+	register.Token = randToken(20)
+
 	err = db.Create(register).Error
 
 	if err != nil {
@@ -576,7 +578,7 @@ func BookmarkGet(c *gin.Context) {
 	// 	outputBookmark = append(outputBookmark, posts)
 	// }
 
-	// db.Raw("SELECT * FROM posts join users on posts.id_user = users.id WHERE posts.id = ? ORDER BY posts.created_at desc", element.IDPost).Scan(&posts)
+	// db.Raw("SELECT * FROM posts join users on posts.id_user = users.id WHERE posts.id = ? ORDER BY posts.created_at desc", element.IDPost).Scan(&outputBookmark)
 
 	response := &m.ResponsePost{
 		outputBookmark,

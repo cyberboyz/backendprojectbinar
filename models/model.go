@@ -16,7 +16,6 @@ type SuccessStatus struct {
 
 type Users struct {
 	ResponseUsers
-	Token    string `json:"token" form:"token"`
 	Password string `json:"password" form:"password"`
 }
 
@@ -24,6 +23,7 @@ type ResponseUsersSignUp struct {
 	ID    uint   `gorm:"primary_key" json:"id_user" form:"id_user"`
 	Email string `gorm:"unique_index" json:"email" form:"email"`
 	Name  string `json:"name" form:"name"`
+	Token string `json:"token" form:"token"`
 }
 
 type ResponseUsers struct {
