@@ -31,6 +31,7 @@ type ResponseUsers struct {
 	Bio          string    `json:"bio"`
 	IDAvatar     uint      `json:"id_avatar"`
 	IDCoverPhoto uint      `json:"id_cover_photo"`
+	TotalPosts   uint      `json:"total_posts"`
 	CreatedAt    time.Time `json:"published_at"`
 	UpdatedAt    time.Time `json:"updated_at"`
 }
@@ -84,6 +85,12 @@ type Categories struct {
 	IDBackground uint   `json:"id_background"`
 }
 
+type UsersCategories struct {
+	ID         uint   `gorm:"primary_key" json:"id"`
+	IDUser     uint   `json:"id_user, omitempty"`
+	Categories string `json:"categories"`
+}
+
 type Posts struct {
 	ID           uint      `gorm:"primary_key" json:"id_post"`
 	IDUser       uint      `json:"id_user, omitempty"`
@@ -120,6 +127,13 @@ type ResponseUser struct {
 	Users      interface{} `json:"users, omitempty"`
 }
 
+type ResponseUserGet struct {
+	Message    string `json:"message"`
+	Success    bool   `json:"success"`
+	StatusCode int    `json:"status_code"`
+	ResponseUsers
+}
+
 type ResponseAuth struct {
 	Authentication interface{} `json:"data", omitempty"`
 	Message        string      `json:"message"`
@@ -130,9 +144,20 @@ type ResponseBookmark struct {
 	Message   string      `json:"message"`
 }
 
+type ResponseAddCategories struct {
+	*UsersCategories
+	Message string `json:"message"`
+}
+
 type ResponsePost struct {
 	Posts   interface{} `json:"posts, omitempty"`
 	Message string      `json:"message"`
+	SuccessStatus
+}
+
+type ResponsePostUpdate struct {
+	*Posts
+	Message string `json:"message"`
 	SuccessStatus
 }
 

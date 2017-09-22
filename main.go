@@ -41,7 +41,8 @@ func main() {
 
 	// Kode yang dikomen untuk delete tabel
 	// db.DropTable("users", "bookmarks", "posts", "categories")
-	db.AutoMigrate(&m.Users{}, &m.Bookmarks{}, &m.Posts{}, &m.Categories{})
+	// db.AutoMigrate(&m.Users{}, &m.Bookmarks{}, &m.Posts{}, &m.Categories{})
+	db.AutoMigrate(&m.Users{}, &m.Bookmarks{}, &m.Posts{}, &m.Categories{}, &m.UsersCategories{})
 
 	router := gin.New()
 
@@ -62,6 +63,7 @@ func main() {
 		logged_in.Use(AuthorizeMiddleware)
 		{
 			logged_in.GET("/logout/", LogoutUser)
+			logged_in.GET("/ownprofile", ShowOwnProfile)
 			post := logged_in.Group("/posts")
 			{
 				post.GET("/", PostGet)
@@ -77,6 +79,7 @@ func main() {
 				usergroup.PUT("/:id", UserUpdate)
 				usergroup.DELETE("/:id", UserDelete)
 				usergroup.GET("/:id/posts", UserPostsGet)
+				usergroup.POST("/categories", AddCategoriesByUser)
 			}
 			bookmark := logged_in.Group("/bookmarks")
 			{
@@ -286,11 +289,17 @@ func UserGet(c *gin.Context) {
 		return
 	}
 
+	outputUser := []m.ResponseUsers{}
+
+	for _, element := range users {
+		outputUser = append(outputUser, element.ResponseUsers)
+	}
+
 	response := &m.ResponseUser{
 		Message:    "Get users : All Users have been shown",
 		Success:    true,
 		StatusCode: http.StatusOK,
-		Users:      users,
+		Users:      outputUser,
 	}
 
 	c.JSON(http.StatusOK, response)
@@ -312,6 +321,9 @@ func UserDetail(c *gin.Context) {
 	user := &m.Users{}
 	err = db.Where("id = ?", id).First(&user).Error
 
+	var total_post uint
+	db.Raw("SELECT count(id) FROM posts where id_user = ?", id).Row().Scan(&total_post)
+
 	if err != nil {
 		response := &m.ResponseUser{
 			Message: err.Error(),
@@ -322,6 +334,7 @@ func UserDetail(c *gin.Context) {
 	}
 
 	output := user.ResponseUsers
+	output.TotalPosts = total_post
 
 	response := &m.ResponseUser{
 		Message:    "Get user : Certain user detail has been shown",
@@ -409,6 +422,40 @@ func UserDelete(c *gin.Context) {
 	c.JSON(http.StatusOK, response)
 }
 
+func ShowOwnProfile(c *gin.Context) {
+
+	authorization := c.Request.Header.Get("Authorization")
+	auth := &m.Users{}
+	err = db.Where("token = ? ", authorization).Find(&auth).Error
+
+	user := &m.Users{}
+	err = db.Where("id = ?", auth.ID).First(&user).Error
+
+	var total_post uint
+	db.Raw("SELECT count(id) FROM posts where id_user = ?", auth.ID).Row().Scan(&total_post)
+
+	if err != nil {
+		response := &m.ResponseUser{
+			Message: err.Error(),
+		}
+		c.JSON(http.StatusServiceUnavailable, response)
+		c.Abort()
+		return
+	}
+
+	output := user.ResponseUsers
+	output.TotalPosts = total_post
+
+	response := &m.ResponseUser{
+		Message:    "Get user : Certain user detail has been shown",
+		Success:    true,
+		StatusCode: http.StatusOK,
+		Users:      output,
+	}
+
+	c.JSON(http.StatusOK, response)
+}
+
 func BookmarkCreate(c *gin.Context) {
 
 	bookmarks := &m.Bookmarks{}
@@ -428,9 +475,8 @@ func BookmarkCreate(c *gin.Context) {
 
 	bookmarks.IDUser = auth.ID
 
-	checkExistingBookmark := db.Table("bookmarks").Where("id_user = ? AND id_post = ? ", bookmarks.IDUser, bookmarks.IDPost).Select("id_user").Row()
 	var id_user string
-	checkExistingBookmark.Scan(&id_user)
+	db.Table("bookmarks").Where("id_user = ? AND id_post = ? ", bookmarks.IDUser, bookmarks.IDPost).Select("id_user").Row().Scan(&id_user)
 
 	if id_user != "" {
 		response := &m.ResponseBookmark{
@@ -555,23 +601,14 @@ func PostDetail(c *gin.Context) {
 	authorization := c.Request.Header.Get("Authorization")
 	auth := &m.Users{}
 
-	err = db.Where("token = ? ", authorization).Find(&auth).Error
-
-	if err != nil {
-		response := &m.ResponsePost{
-			Message: "Cannot execute the query to search user based on token",
-		}
-		c.JSON(http.StatusServiceUnavailable, response)
-		c.Abort()
-		return
-	}
+	db.Where("token = ? ", authorization).Find(&auth)
 
 	post := &m.PostsUsersJoin{}
 	err = db.Raw("SELECT * FROM posts join users on posts.id_user = users.id WHERE posts.id = ?", id).Scan(&post).Error
 
 	if err != nil {
 		response := &m.ResponsePost{
-			Message: "Cannot execute the join query from posts and users table",
+			Message: "The post does not exist",
 		}
 		c.JSON(http.StatusServiceUnavailable, response)
 		c.Abort()
@@ -661,8 +698,19 @@ func PostUpdate(c *gin.Context) {
 	auth := &m.Users{}
 	checkuserID := &m.Posts{}
 
-	err = db.Where("token = ? ", authorization).Find(&auth).Error
+	db.Where("token = ? ", authorization).Find(&auth)
+
 	err = db.Where("id = ?", id).Find(&checkuserID).Error
+
+	fmt.Println(checkuserID.IDUser)
+	if checkuserID.IDUser == 0 {
+		response := &m.ResponsePost{
+			Message: "Error : The post does not exist",
+		}
+		c.JSON(http.StatusBadRequest, response)
+		c.Abort()
+		return
+	}
 
 	if checkuserID.IDUser != auth.ID {
 		response := &m.ResponsePost{
@@ -677,6 +725,22 @@ func PostUpdate(c *gin.Context) {
 	post.ID = id
 	err = db.Save(post).Error
 
+	postusers := &m.PostsUsersJoin{}
+	err = db.Raw("SELECT * FROM posts join users on posts.id_user = users.id WHERE posts.id = ?", id).Scan(&postusers).Error
+
+	if err != nil {
+		response := &m.ResponsePost{
+			Message: "Cannot execute the join query from posts and users table",
+		}
+		c.JSON(http.StatusServiceUnavailable, response)
+		c.Abort()
+		return
+	}
+
+	editMode := false
+	if auth.ID == postusers.IDUser {
+		editMode = true
+	}
 	if err != nil {
 		response := &m.ResponsePost{
 			Message: err.Error(),
@@ -686,9 +750,10 @@ func PostUpdate(c *gin.Context) {
 		return
 	}
 
-	response := &m.ResponsePost{
-		post,
+	response := &m.ResponseDetailPost{
+		postusers,
 		"Post has been updated",
+		editMode,
 		m.SuccessStatus{true, 200},
 	}
 
@@ -835,4 +900,57 @@ func UserPostsGet(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, response)
+}
+
+func AddCategoriesByUser(c *gin.Context) {
+
+	categoriesByUser := &m.UsersCategories{}
+	err := c.BindJSON(&categoriesByUser)
+
+	if err != nil {
+		response := &m.ResponseAddCategories{
+			Message: err.Error(),
+		}
+		c.JSON(http.StatusBadRequest, response)
+		c.Abort()
+		return
+	}
+
+	authorization := c.Request.Header.Get("Authorization")
+	auth := &m.Users{}
+	err = db.Where("token = ? ", authorization).Find(&auth).Error
+
+	categoriesByUser.IDUser = auth.ID
+
+	var id_user string
+	db.Table("users_categories").Where("id_user = ? AND categories = ? ", categoriesByUser.IDUser, categoriesByUser.Categories).Select("id_user").Row().Scan(&id_user)
+	// var id_user string
+	// db.Table("bookmarks").Where("id_user = ? AND id_post = ? ", bookmarks.IDUser, bookmarks.IDPost).Select("id_user").Row().Scan(&id_user)
+
+	if id_user != "" {
+		response := &m.ResponseAddCategories{
+			Message: "Error : This user has chosen these categories",
+		}
+		c.JSON(http.StatusBadRequest, response)
+		c.Abort()
+		return
+	}
+
+	err = db.Create(categoriesByUser).Error
+
+	if err != nil {
+		response := &m.ResponseAddCategories{
+			Message: err.Error(),
+		}
+		c.JSON(http.StatusBadRequest, response)
+		c.Abort()
+		return
+	}
+
+	response := &m.ResponseAddCategories{
+		UsersCategories: categoriesByUser,
+		Message:         "New categories have been added for this user",
+	}
+
+	c.JSON(http.StatusCreated, response)
 }
