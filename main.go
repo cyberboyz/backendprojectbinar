@@ -64,7 +64,6 @@ func main() {
 		{
 			logged_in.GET("/logout/", LogoutUser)
 			logged_in.GET("/ownprofile", ShowOwnProfile)
-			logged_in.GET("/ownposts", ShowOwnPosts).Use(AuthorizeMiddleware)
 			post := logged_in.Group("/posts")
 			{
 				post.GET("/", PostGet)
@@ -102,6 +101,7 @@ func main() {
 				category.POST("/", CategoryCreate).Use(AuthorizeMiddleware)
 				category.GET("/", CategoryGet).Use(AuthorizeMiddleware)
 			}
+			logged_in.GET("/ownposts", ShowOwnPosts).Use(AuthorizeMiddleware)
 		}
 	}
 	router.Run(":" + port)
