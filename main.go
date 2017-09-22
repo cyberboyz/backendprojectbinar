@@ -60,7 +60,6 @@ func main() {
 		v1.POST("/register/", RegisterUser)
 
 		logged_in := v1.Group("")
-		logged_in.Use(AuthorizeMiddleware)
 		{
 			logged_in.GET("/logout/", LogoutUser)
 			logged_in.GET("/ownprofile", ShowOwnProfile)
@@ -68,9 +67,9 @@ func main() {
 			{
 				post.GET("/", PostGet)
 				post.GET("/:id", PostDetail)
-				post.POST("/", PostCreate)
-				post.PUT("/:id", PostUpdate)
-				post.DELETE("/:id", PostDelete)
+				post.POST("/", PostCreate).Use(AuthorizeMiddleware)
+				post.PUT("/:id", PostUpdate).Use(AuthorizeMiddleware)
+				post.DELETE("/:id", PostDelete).Use(AuthorizeMiddleware)
 				// comment := post.Group("/comments")
 				// {
 				// 	comment.GET("/", CommentGet)
@@ -84,21 +83,21 @@ func main() {
 			{
 				usergroup.GET("/", UserGet)
 				usergroup.GET("/:id", UserDetail)
-				usergroup.PUT("/:id", UserUpdate)
-				usergroup.DELETE("/:id", UserDelete)
-				usergroup.GET("/:id/posts", UserPostsGet)
-				usergroup.POST("/categories", AddCategoriesByUser)
+				usergroup.PUT("/:id", UserUpdate).Use(AuthorizeMiddleware)
+				usergroup.DELETE("/:id", UserDelete).Use(AuthorizeMiddleware)
+				usergroup.GET("/:id/posts", UserPostsGet).Use(AuthorizeMiddleware)
+				usergroup.POST("/categories", AddCategoriesByUser).Use(AuthorizeMiddleware)
 			}
 			bookmark := logged_in.Group("/bookmarks")
 			{
-				bookmark.POST("/", BookmarkCreate)
-				bookmark.GET("/", BookmarkGet)
-				bookmark.DELETE("/:id", BookmarkDelete)
+				bookmark.POST("/", BookmarkCreate).Use(AuthorizeMiddleware)
+				bookmark.GET("/", BookmarkGet).Use(AuthorizeMiddleware)
+				bookmark.DELETE("/:id", BookmarkDelete).Use(AuthorizeMiddleware)
 			}
 			category := logged_in.Group("/categories")
 			{
-				category.POST("/", CategoryCreate)
-				category.GET("/", CategoryGet)
+				category.POST("/", CategoryCreate).Use(AuthorizeMiddleware)
+				category.GET("/", CategoryGet).Use(AuthorizeMiddleware)
 				category.GET("/:id", CategoryPostsList)
 			}
 		}
@@ -507,6 +506,29 @@ func BookmarkCreate(c *gin.Context) {
 	auth := &m.Users{}
 	err = db.Where("token = ? ", authorization).Find(&auth).Error
 
+	if err != nil {
+		response := &m.ResponseBookmark{
+			Message: err.Error(),
+		}
+		c.JSON(http.StatusBadRequest, response)
+		c.Abort()
+		return
+	}
+
+	var post_title string
+	db.Table("posts").Where("id = ?", bookmarks.IDPost).Select("post_title").Row().Scan(&post_title)
+
+	fmt.Println(bookmarks.IDPost)
+	fmt.Println(post_title)
+	if post_title == "" {
+		response := &m.ResponseBookmark{
+			Message: "Error : You cannot bookmark this post, it does not exist",
+		}
+		c.JSON(http.StatusBadRequest, response)
+		c.Abort()
+		return
+	}
+
 	bookmarks.IDUser = auth.ID
 
 	var id_user string
@@ -568,15 +590,15 @@ func BookmarkGet(c *gin.Context) {
 		return
 	}
 
-	// posts := &m.PostsUsersJoin{}
-	outputBookmark := []*m.PostsUsersJoin{}
+	posts := m.PostsUsersJoin{}
+	outputBookmark := []m.PostsUsersJoin{}
 
-	// for _, element := range bookmarks {
-	// 	db.Raw("SELECT * FROM posts join users on posts.id_user = users.id WHERE posts.id = ? ORDER BY posts.created_at desc", element.IDPost).Scan(&posts)
-	// 	fmt.Println(element.IDPost)
-	// 	fmt.Println(posts.PostTitle)
-	// 	outputBookmark = append(outputBookmark, posts)
-	// }
+	for _, element := range bookmarks {
+		db.Raw("SELECT * FROM posts join users on posts.id_user = users.id WHERE posts.id = ? ORDER BY posts.created_at desc", element.IDPost).Scan(&posts)
+		fmt.Println(element.IDPost)
+		fmt.Println(posts.PostTitle)
+		outputBookmark = append(outputBookmark, posts)
+	}
 
 	// db.Raw("SELECT * FROM posts join users on posts.id_user = users.id WHERE posts.id = ? ORDER BY posts.created_at desc", element.IDPost).Scan(&outputBookmark)
 

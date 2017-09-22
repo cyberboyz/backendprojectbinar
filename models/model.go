@@ -16,14 +16,14 @@ type SuccessStatus struct {
 
 type Users struct {
 	ResponseUsers
-	Password string `json:"password" form:"password"`
+	Password string `json:"password"`
 }
 
 type ResponseUsersSignUp struct {
-	ID    uint   `gorm:"primary_key" json:"id_user" form:"id_user"`
-	Email string `gorm:"unique_index" json:"email" form:"email"`
-	Name  string `json:"name" form:"name"`
-	Token string `json:"token" form:"token"`
+	ID    uint   `gorm:"primary_key" json:"id_user"`
+	Email string `gorm:"unique_index" json:"email"`
+	Name  string `json:"name"`
+	Token string `json:"token"`
 }
 
 type ResponseUsers struct {
