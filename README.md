@@ -128,8 +128,17 @@ Untuk menguji URL dengan Postman / cURL
 | Delete Profile        | `<your_url>/v1/profile/<id_user>`  |   **DELETE** |
 | Add Category          | `<your_url>/v1/categories`         |   **POST**   |
 | Show All Categories   | `<your_url>/v1/categories`         |   **GET**    |
-| Show All Posts Based  | `<your_url>/v1/categories`         |   **GET**    |
-| on Categories         |                                    |              |
+| Show All Posts Based on Categories | `<your_url>/v1/categories`         |   **GET**    |
+| Show All Posts Based on Several Categories| `<your_url>/v1/3categoriesposts` |   **POST** |
+| Add Bookmark          | `<your_url>/v1/bookmarks`          |   **POST**   |
+| Delete Bookmark       | `<your_url>/v1/bookmarks/<id_post>`|   **DELETE** |
+| Show Own Bookmarks    | `<your_url>/v1/bookmarks`          |   **GET**    |
+| Show Own Profile      | `<your_url>/v1/ownprofile`         |   **GET**    |
+| Show Own Posts        | `<your_url>/v1/ownposts`           |   **GET**    |
+| Add Categories by User| `<your_url>/v1/owncategory`        |   **POST**   |
+| Update Categories by User| `<your_url>/v1/owncategory`     |   **PUT**    |
+| Delete Categories by User| `<your_url>/v1/owncategory`     |   **DELETE** |
+| Get All Posts Based on User| `<your_url>/v1/profile/<id_user>/posts` |   **GET** |
 
 
 # Programmer
