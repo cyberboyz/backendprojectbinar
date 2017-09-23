@@ -102,6 +102,7 @@ func main() {
 				category.POST("/", CategoryCreate).Use(AuthorizeMiddleware)
 				category.GET("/", CategoryGet).Use(AuthorizeMiddleware)
 			}
+			logged_in.DELETE("/deleteowncategories", DeleteCategoriesByUser).Use(AuthorizeMiddleware)
 			logged_in.GET("/ownposts", ShowOwnPosts).Use(AuthorizeMiddleware)
 		}
 	}
@@ -1207,6 +1208,49 @@ func AddCategoriesByUser(c *gin.Context) {
 
 		categoriesByUser.Categories = element
 		db.Save(&categoriesByUser)
+	}
+
+	response := &m.ResponseAddCategories{
+		InputUsersCategories: inputCategoriesByUser,
+		Message:              "New categories have been added for this user",
+	}
+
+	c.JSON(http.StatusCreated, response)
+}
+
+func DeleteCategoriesByUser(c *gin.Context) {
+
+	inputCategoriesByUser := &m.InputUsersCategories{}
+	err := c.Bind(inputCategoriesByUser)
+
+	if err != nil {
+		response := &m.ResponseAddCategories{
+			Message: err.Error(),
+		}
+		c.JSON(http.StatusBadRequest, response)
+		c.Abort()
+		return
+	}
+
+	authorization := c.Request.Header.Get("Authorization")
+	authorization = strings.TrimPrefix(authorization, "Bearer ")
+
+	auth := &m.Users{}
+	err = db.Where("token = ? ", authorization).Find(&auth).Error
+
+	inputCategoriesByUser.IDUser = auth.ID
+	// var categoryString string
+
+	for _, element := range inputCategoriesByUser.Categories {
+		categoriesByUser := &m.UsersCategories{}
+		categoriesByUser.IDUser = auth.ID
+		fmt.Println(auth.ID)
+		fmt.Println(element)
+		categoriesByUser.Categories = element
+		// db.Delete(&categoriesByUser)
+		// db.Raw("DELETE from users_categories WHERE id_user = ? AND categories = ?", auth.ID, element)
+
+		db.Where("id_user = ? AND categories = ?", auth.ID, element).Delete(&m.UsersCategories{})
 	}
 
 	response := &m.ResponseAddCategories{
