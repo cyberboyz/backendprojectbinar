@@ -435,6 +435,29 @@ func UserDetail(c *gin.Context) {
 
 func UserUpdate(c *gin.Context) {
 
+	authorization := c.Request.Header.Get("Authorization")
+	auth := &m.Users{}
+
+	if authorization == "" {
+		response := &m.ResponseUser{
+			Message: "Cannot access the resource : You need to authenticate",
+		}
+		c.JSON(http.StatusUnauthorized, response)
+		c.Abort()
+		return
+	}
+
+	err = db.Where("token = ? ", authorization).Find(&auth).Error
+
+	if err != nil {
+		response := &m.ResponseUser{
+			Message: "Unauthorized access",
+		}
+		c.JSON(http.StatusUnauthorized, response)
+		c.Abort()
+		return
+	}
+
 	idStr := c.Param("id")
 	id64, err := strconv.ParseUint(idStr, 10, 64)
 	id := uint(id64)
@@ -803,7 +826,26 @@ func PostCreate(c *gin.Context) {
 
 	authorization := c.Request.Header.Get("Authorization")
 	auth := &m.Users{}
+
+	if authorization == "" {
+		response := &m.ResponseUser{
+			Message: "Cannot access the resource : You need to authenticate",
+		}
+		c.JSON(http.StatusUnauthorized, response)
+		c.Abort()
+		return
+	}
+
 	err = db.Where("token = ? ", authorization).Find(&auth).Error
+
+	if err != nil {
+		response := &m.ResponseUser{
+			Message: "Unauthorized access",
+		}
+		c.JSON(http.StatusUnauthorized, response)
+		c.Abort()
+		return
+	}
 
 	post.IDUser = auth.ID
 
@@ -853,11 +895,30 @@ func PostUpdate(c *gin.Context) {
 		return
 	}
 
-	authorization := c.Request.Header.Get("Authorization")
-	auth := &m.Users{}
 	checkuserID := &m.Posts{}
 
-	db.Where("token = ? ", authorization).Find(&auth)
+	authorization := c.Request.Header.Get("Authorization")
+	auth := &m.Users{}
+
+	if authorization == "" {
+		response := &m.ResponseUser{
+			Message: "Cannot access the resource : You need to authenticate",
+		}
+		c.JSON(http.StatusUnauthorized, response)
+		c.Abort()
+		return
+	}
+
+	err = db.Where("token = ? ", authorization).Find(&auth).Error
+
+	if err != nil {
+		response := &m.ResponseUser{
+			Message: "Unauthorized access",
+		}
+		c.JSON(http.StatusUnauthorized, response)
+		c.Abort()
+		return
+	}
 
 	err = db.Where("id = ?", id).Find(&checkuserID).Error
 
