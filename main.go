@@ -88,7 +88,6 @@ func main() {
 				usergroup.GET("/:id/posts", UserPostsGet)
 				usergroup.PUT("/:id", UserUpdate).Use(AuthorizeMiddleware)
 				usergroup.DELETE("/:id", UserDelete).Use(AuthorizeMiddleware)
-				usergroup.POST("/categories", AddCategoriesByUser).Use(AuthorizeMiddleware)
 			}
 			bookmark := logged_in.Group("/bookmarks")
 			{
@@ -102,6 +101,8 @@ func main() {
 				category.POST("/", CategoryCreate).Use(AuthorizeMiddleware)
 				category.GET("/", CategoryGet).Use(AuthorizeMiddleware)
 			}
+			logged_in.POST("/addowncategories", AddCategoriesByUser).Use(AuthorizeMiddleware)
+			logged_in.PUT("/updateowncategories", UpdateCategoriesByUser).Use(AuthorizeMiddleware)
 			logged_in.DELETE("/deleteowncategories", DeleteCategoriesByUser).Use(AuthorizeMiddleware)
 			logged_in.GET("/ownposts", ShowOwnPosts).Use(AuthorizeMiddleware)
 		}
@@ -1212,7 +1213,48 @@ func AddCategoriesByUser(c *gin.Context) {
 
 	response := &m.ResponseAddCategories{
 		InputUsersCategories: inputCategoriesByUser,
-		Message:              "New categories have been added for this user",
+		Message:              "Success : New categories have been added for this user",
+	}
+
+	c.JSON(http.StatusCreated, response)
+}
+
+func UpdateCategoriesByUser(c *gin.Context) {
+
+	inputCategoriesByUser := &m.InputUsersCategories{}
+	err := c.Bind(inputCategoriesByUser)
+
+	if err != nil {
+		response := &m.ResponseAddCategories{
+			Message: err.Error(),
+		}
+		c.JSON(http.StatusBadRequest, response)
+		c.Abort()
+		return
+	}
+
+	authorization := c.Request.Header.Get("Authorization")
+	authorization = strings.TrimPrefix(authorization, "Bearer ")
+
+	auth := &m.Users{}
+	err = db.Where("token = ? ", authorization).Find(&auth).Error
+
+	inputCategoriesByUser.IDUser = auth.ID
+	// var categoryString string
+
+	db.Where("id_user = ?", auth.ID).Delete(&m.UsersCategories{})
+
+	for _, element := range inputCategoriesByUser.Categories {
+		categoriesByUser := &m.UsersCategories{}
+		categoriesByUser.IDUser = auth.ID
+
+		categoriesByUser.Categories = element
+		db.Save(&categoriesByUser)
+	}
+
+	response := &m.ResponseAddCategories{
+		InputUsersCategories: inputCategoriesByUser,
+		Message:              "Success : These categories have been updated for this user",
 	}
 
 	c.JSON(http.StatusCreated, response)
@@ -1255,7 +1297,7 @@ func DeleteCategoriesByUser(c *gin.Context) {
 
 	response := &m.ResponseAddCategories{
 		InputUsersCategories: inputCategoriesByUser,
-		Message:              "New categories have been added for this user",
+		Message:              "Success : These categories have been deleted for this user",
 	}
 
 	c.JSON(http.StatusCreated, response)
