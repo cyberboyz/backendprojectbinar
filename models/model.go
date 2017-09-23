@@ -103,6 +103,10 @@ type InputUsersCategories struct {
 	Categories []string `form:"categories" json:"categories"`
 }
 
+type InputCategories struct {
+	Categories []string `form:"categories" json:"categories"`
+}
+
 type Posts struct {
 	ID           uint      `gorm:"primary_key" form:"id_post" json:"id_post"`
 	IDUser       uint      `form:"id_user" json:"id_user, omitempty"`

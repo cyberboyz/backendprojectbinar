@@ -64,16 +64,17 @@ func main() {
 		{
 			logged_in.GET("/logout/", LogoutUser)
 			logged_in.GET("/ownprofile", ShowOwnProfile)
+			logged_in.POST("/3categoriesposts", SeveralCategoriesPostsList)
 			post := logged_in.Group("/posts")
 			{
-				// comment := post.Group("/comments")
-				// {
-				// 	// comment.GET("/", CommentGet)
-				// 	// comment.GET("/:id", CommentDetail)
-				// 	// comment.POST("/", CommentCreate).Use(AuthorizeMiddleware)
-				// 	// comment.PUT("/:id", CommentUpdate).Use(AuthorizeMiddleware)
-				// 	// comment.DELETE("/:id", CommentDelete).Use(AuthorizeMiddleware)
-				// }
+				comment := post.Group("/comments")
+				{
+					// comment.GET("/", CommentGet)
+					// comment.GET("/:id", CommentDetail)
+					comment.POST("/", CommentCreate).Use(AuthorizeMiddleware)
+					// comment.PUT("/:id", CommentUpdate).Use(AuthorizeMiddleware)
+					// comment.DELETE("/:id", CommentDelete).Use(AuthorizeMiddleware)
+				}
 				post.GET("/", PostGet)
 				post.GET("/:id", PostDetail)
 				post.POST("/", PostCreate).Use(AuthorizeMiddleware)
@@ -1092,9 +1093,6 @@ func AddCategoriesByUser(c *gin.Context) {
 	for _, element := range inputCategoriesByUser.Categories {
 		categoriesByUser := &m.UsersCategories{}
 		categoriesByUser.IDUser = auth.ID
-		// fmt.Println(categoriesByUser.IDUser)
-		// fmt.Println(element)
-		// db.Table("users_categories").Where("id_user = ? AND categories = ? ", categoriesByUser.IDUser, element).Select("categories").Scan(&categoryString)
 
 		categoriesByUser.Categories = element
 		db.Save(&categoriesByUser)
@@ -1133,6 +1131,47 @@ func ShowOwnPosts(c *gin.Context) {
 		"Get posts",
 		true,
 		200,
+	}
+
+	c.JSON(http.StatusOK, response)
+}
+
+func SeveralCategoriesPostsList(c *gin.Context) {
+
+	inputCategories := &m.InputCategories{}
+	err := c.Bind(inputCategories)
+
+	if err != nil {
+		response := &m.ResponseAddCategories{
+			Message: err.Error(),
+		}
+		c.JSON(http.StatusBadRequest, response)
+		c.Abort()
+		return
+	}
+
+	posts := []m.PostsUsersJoin{}
+
+	outputPosts := []m.PostsUsersJoin{}
+
+	for _, element := range inputCategories.Categories {
+		db.Raw("SELECT * FROM posts join users on posts.id_user = users.id WHERE posts.categories = ? ORDER BY posts.created_at desc", element).Scan(&posts)
+		for _, postElement := range posts {
+			outputPosts = append(outputPosts, postElement)
+		}
+	}
+
+	if err != nil {
+		response := &m.ResponsePost{
+			Message: err.Error(),
+		}
+		c.JSON(http.StatusServiceUnavailable, response)
+		c.Abort()
+		return
+	}
+
+	response := &m.ResponsePost{
+		outputPosts, "Posts based on categories have been shown", true, 200,
 	}
 
 	c.JSON(http.StatusOK, response)
