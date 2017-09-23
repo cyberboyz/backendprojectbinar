@@ -154,6 +154,10 @@ func RegisterUser(c *gin.Context) {
 		return
 	}
 
+	// fmt.Println(register.Email)
+	// fmt.Println(register.Password)
+	// fmt.Println(register.Name)
+
 	if register.Email == "" {
 		response := &m.ResponseAuth{
 			Message: "Error : Email cannot be empty",
@@ -237,9 +241,14 @@ func randToken(length int) string {
 func LoginUser(c *gin.Context) {
 	login := &m.Users{}
 
-	err = c.Bind(login)
+	err := c.Bind(login)
+	c.BindJSON(login)
+
+	// fmt.Println(login.Password)
+
 	inputPassword := login.Password
 	login.Email = strings.ToLower(login.Email)
+	// fmt.Println(login.Email)
 
 	db.Where("email = ? ", login.Email).Find(&login)
 
@@ -375,7 +384,7 @@ func UserDetail(c *gin.Context) {
 
 	for categoriesRows.Next() {
 		categoriesRows.Scan(&userCategories)
-		fmt.Println(userCategories)
+		// fmt.Println(userCategories)
 		listCategories = append(listCategories, userCategories)
 	}
 
@@ -500,7 +509,7 @@ func ShowOwnProfile(c *gin.Context) {
 
 	for categoriesRows.Next() {
 		categoriesRows.Scan(&userCategories)
-		fmt.Println(userCategories)
+		// fmt.Println(userCategories)
 		listCategories = append(listCategories, userCategories)
 	}
 
@@ -549,8 +558,8 @@ func BookmarkCreate(c *gin.Context) {
 	var post_title string
 	db.Table("posts").Where("id = ?", bookmarks.IDPost).Select("post_title").Row().Scan(&post_title)
 
-	fmt.Println(bookmarks.IDPost)
-	fmt.Println(post_title)
+	// fmt.Println(bookmarks.IDPost)
+	// fmt.Println(post_title)
 	if post_title == "" {
 		response := &m.ResponseBookmark{
 			Message: "Error : You cannot bookmark this post, it does not exist",
@@ -626,8 +635,8 @@ func BookmarkGet(c *gin.Context) {
 
 	for _, element := range bookmarks {
 		db.Raw("SELECT * FROM posts join users on posts.id_user = users.id WHERE posts.id = ? ORDER BY posts.created_at desc", element.IDPost).Scan(&posts)
-		fmt.Println(element.IDPost)
-		fmt.Println(posts.PostTitle)
+		// fmt.Println(element.IDPost)
+		// fmt.Println(posts.PostTitle)
 		outputBookmark = append(outputBookmark, posts)
 	}
 
@@ -661,8 +670,8 @@ func BookmarkDelete(c *gin.Context) {
 	db.Where("token = ? ", authorization).Find(&auth)
 
 	checkDeleteBookmark := db.Where("id_post = ? AND id_user = ?", id, auth.ID).Delete(m.Bookmarks{}).RowsAffected
-	fmt.Println(id)
-	fmt.Println(auth.ID)
+	// fmt.Println(id)
+	// fmt.Println(auth.ID)
 
 	if checkDeleteBookmark == 0 {
 		response := &m.ResponseBookmark{
@@ -1053,8 +1062,8 @@ func AddCategoriesByUser(c *gin.Context) {
 	for _, element := range inputCategoriesByUser.Categories {
 		categoriesByUser := &m.UsersCategories{}
 		categoriesByUser.IDUser = auth.ID
-		fmt.Println(categoriesByUser.IDUser)
-		fmt.Println(element)
+		// fmt.Println(categoriesByUser.IDUser)
+		// fmt.Println(element)
 		// db.Table("users_categories").Where("id_user = ? AND categories = ? ", categoriesByUser.IDUser, element).Select("categories").Scan(&categoryString)
 
 		categoriesByUser.Categories = element
