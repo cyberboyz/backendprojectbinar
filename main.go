@@ -269,13 +269,38 @@ func LoginUser(c *gin.Context) {
 		login.Token = randToken(20)
 		db.Model(login).Update("token", login.Token)
 	}
+	// fmt.Println(login.Email)
 
-	response := &m.ResponseLogin{
-		Token:      login.Token,
-		Email:      login.Email,
-		Message:    "Login Successful : User has been logged in",
-		Success:    true,
-		StatusCode: http.StatusOK,
+	var id_user uint
+	db.Raw("SELECT id from users where email = ?", login.Email).Row().Scan(&id_user)
+	// fmt.Println(id_user)
+
+	var total_post uint
+	db.Raw("SELECT count(id) FROM posts where id_user = ?", id_user).Row().Scan(&total_post)
+	// fmt.Println(total_post)
+
+	var userCategories string
+	categoriesRows, _ := db.Raw("SELECT categories from users_categories where id_user = ? GROUP BY categories", id_user).Rows()
+	defer categoriesRows.Close()
+
+	var listCategories []string
+
+	for categoriesRows.Next() {
+		categoriesRows.Scan(&userCategories)
+		// fmt.Println(userCategories)
+		listCategories = append(listCategories, userCategories)
+	}
+
+	output := login.ResponseUsers
+	output.TotalPosts = total_post
+	// output.ListCategories = listCategories
+
+	response := &m.NewResponseUserDetail{
+		Message:        "Get user : Certain user detail has been shown",
+		Success:        true,
+		StatusCode:     http.StatusOK,
+		ResponseUsers:  output,
+		ListCategories: listCategories,
 	}
 
 	c.JSON(http.StatusOK, response)
