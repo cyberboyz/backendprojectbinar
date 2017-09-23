@@ -67,14 +67,14 @@ func main() {
 			logged_in.POST("/3categoriesposts", SeveralCategoriesPostsList)
 			post := logged_in.Group("/posts")
 			{
-				comment := post.Group("/comments")
-				{
-					// comment.GET("/", CommentGet)
-					// comment.GET("/:id", CommentDetail)
-					comment.POST("/", CommentCreate).Use(AuthorizeMiddleware)
-					// comment.PUT("/:id", CommentUpdate).Use(AuthorizeMiddleware)
-					// comment.DELETE("/:id", CommentDelete).Use(AuthorizeMiddleware)
-				}
+				// comment := post.Group("/comments")
+				// {
+				// 	// comment.GET("/", CommentGet)
+				// 	// comment.GET("/:id", CommentDetail)
+				// 	// comment.POST("/", CommentCreate).Use(AuthorizeMiddleware)
+				// 	// comment.PUT("/:id", CommentUpdate).Use(AuthorizeMiddleware)
+				// 	// comment.DELETE("/:id", CommentDelete).Use(AuthorizeMiddleware)
+				// }
 				post.GET("/", PostGet)
 				post.GET("/:id", PostDetail)
 				post.POST("/", PostCreate).Use(AuthorizeMiddleware)
