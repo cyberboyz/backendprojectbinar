@@ -11,7 +11,6 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
-	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
@@ -86,9 +85,9 @@ func main() {
 			{
 				usergroup.GET("/", UserGet)
 				usergroup.GET("/:id", UserDetail)
+				usergroup.GET("/:id/posts", UserPostsGet)
 				usergroup.PUT("/:id", UserUpdate).Use(AuthorizeMiddleware)
 				usergroup.DELETE("/:id", UserDelete).Use(AuthorizeMiddleware)
-				usergroup.GET("/:id/posts", UserPostsGet).Use(AuthorizeMiddleware)
 				usergroup.POST("/categories", AddCategoriesByUser).Use(AuthorizeMiddleware)
 			}
 			bookmark := logged_in.Group("/bookmarks")
@@ -111,6 +110,7 @@ func main() {
 
 func AuthorizeMiddleware(c *gin.Context) {
 	authorization := c.Request.Header.Get("Authorization")
+	authorization = strings.TrimPrefix(authorization, "Bearer ")
 
 	auth := &m.Users{}
 
@@ -317,6 +317,7 @@ func LogoutUser(c *gin.Context) {
 	logout := &m.Users{}
 
 	authorization := c.Request.Header.Get("Authorization")
+	authorization = strings.TrimPrefix(authorization, "Bearer ")
 
 	db.Model(logout).Update("token", logout.Token).Where("token", authorization)
 
@@ -438,6 +439,7 @@ func UserDetail(c *gin.Context) {
 func UserUpdate(c *gin.Context) {
 
 	authorization := c.Request.Header.Get("Authorization")
+	authorization = strings.TrimPrefix(authorization, "Bearer ")
 	auth := &m.Users{}
 
 	if authorization == "" {
@@ -538,6 +540,7 @@ func UserDelete(c *gin.Context) {
 func ShowOwnProfile(c *gin.Context) {
 
 	authorization := c.Request.Header.Get("Authorization")
+	authorization = strings.TrimPrefix(authorization, "Bearer ")
 	auth := &m.Users{}
 	err = db.Where("token = ? ", authorization).Find(&auth).Error
 
@@ -598,14 +601,25 @@ func BookmarkCreate(c *gin.Context) {
 	}
 
 	authorization := c.Request.Header.Get("Authorization")
+	authorization = strings.TrimPrefix(authorization, "Bearer ")
+
+	if authorization == "" {
+		response := &m.ResponseUser{
+			Message: "Cannot access the resource : You need to authenticate",
+		}
+		c.JSON(http.StatusUnauthorized, response)
+		c.Abort()
+		return
+	}
+
 	auth := &m.Users{}
 	err = db.Where("token = ? ", authorization).Find(&auth).Error
 
 	if err != nil {
-		response := &m.ResponseBookmark{
-			Message: err.Error(),
+		response := &m.ResponseUser{
+			Message: "Unauthorized access",
 		}
-		c.JSON(http.StatusBadRequest, response)
+		c.JSON(http.StatusUnauthorized, response)
 		c.Abort()
 		return
 	}
@@ -662,6 +676,7 @@ func BookmarkGet(c *gin.Context) {
 	bookmarks := []*m.Bookmarks{}
 
 	authorization := c.Request.Header.Get("Authorization")
+	authorization = strings.TrimPrefix(authorization, "Bearer ")
 	auth := &m.Users{}
 	err = db.Where("token = ? ", authorization).Find(&auth).Error
 
@@ -721,6 +736,7 @@ func BookmarkDelete(c *gin.Context) {
 	}
 
 	authorization := c.Request.Header.Get("Authorization")
+	authorization = strings.TrimPrefix(authorization, "Bearer ")
 	auth := &m.Users{}
 	db.Where("token = ? ", authorization).Find(&auth)
 
@@ -780,6 +796,7 @@ func PostDetail(c *gin.Context) {
 	}
 
 	authorization := c.Request.Header.Get("Authorization")
+	authorization = strings.TrimPrefix(authorization, "Bearer ")
 	auth := &m.Users{}
 
 	db.Where("token = ? ", authorization).Find(&auth)
@@ -827,10 +844,7 @@ func PostCreate(c *gin.Context) {
 	}
 
 	authorization := c.Request.Header.Get("Authorization")
-	// fmt.Println(authorization)
-	// fmt.Println(reflect.TypeOf(authorization))
 	authorization = strings.TrimPrefix(authorization, "Bearer ")
-	// fmt.Println(authorization)
 
 	auth := &m.Users{}
 
@@ -905,6 +919,8 @@ func PostUpdate(c *gin.Context) {
 	checkuserID := &m.Posts{}
 
 	authorization := c.Request.Header.Get("Authorization")
+	authorization = strings.TrimPrefix(authorization, "Bearer ")
+
 	auth := &m.Users{}
 
 	if authorization == "" {
@@ -1021,6 +1037,31 @@ func PostDelete(c *gin.Context) {
 }
 
 func CategoryCreate(c *gin.Context) {
+
+	authorization := c.Request.Header.Get("Authorization")
+	authorization = strings.TrimPrefix(authorization, "Bearer ")
+
+	auth := &m.Users{}
+
+	if authorization == "" {
+		response := &m.ResponseUser{
+			Message: "Cannot access the resource : You need to authenticate",
+		}
+		c.JSON(http.StatusUnauthorized, response)
+		c.Abort()
+		return
+	}
+
+	err = db.Where("token = ? ", authorization).Find(&auth).Error
+
+	if err != nil {
+		response := &m.ResponseUser{
+			Message: "Unauthorized access",
+		}
+		c.JSON(http.StatusUnauthorized, response)
+		c.Abort()
+		return
+	}
 
 	category := &m.Categories{}
 	err := c.Bind(category)
@@ -1152,6 +1193,8 @@ func AddCategoriesByUser(c *gin.Context) {
 	}
 
 	authorization := c.Request.Header.Get("Authorization")
+	authorization = strings.TrimPrefix(authorization, "Bearer ")
+
 	auth := &m.Users{}
 	err = db.Where("token = ? ", authorization).Find(&auth).Error
 
@@ -1176,6 +1219,7 @@ func AddCategoriesByUser(c *gin.Context) {
 
 func ShowOwnPosts(c *gin.Context) {
 	authorization := c.Request.Header.Get("Authorization")
+	authorization = strings.TrimPrefix(authorization, "Bearer ")
 	auth := &m.Users{}
 	err = db.Where("token = ? ", authorization).Find(&auth).Error
 
