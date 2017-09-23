@@ -11,6 +11,7 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
+	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
@@ -110,6 +111,7 @@ func main() {
 
 func AuthorizeMiddleware(c *gin.Context) {
 	authorization := c.Request.Header.Get("Authorization")
+
 	auth := &m.Users{}
 
 	if authorization == "" {
@@ -825,6 +827,11 @@ func PostCreate(c *gin.Context) {
 	}
 
 	authorization := c.Request.Header.Get("Authorization")
+	// fmt.Println(authorization)
+	// fmt.Println(reflect.TypeOf(authorization))
+	authorization = strings.TrimPrefix(authorization, "Bearer ")
+	// fmt.Println(authorization)
+
 	auth := &m.Users{}
 
 	if authorization == "" {
