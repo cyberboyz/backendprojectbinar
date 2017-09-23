@@ -216,16 +216,21 @@ func RegisterUser(c *gin.Context) {
 		return
 	}
 
-	registerOutput := register.ResponseUsersSignUp
+	output := register.ResponseUsers
+	output.TotalPosts = 0
+	// output.ListCategories = listCategories
 
-	response := &m.Response{
-		Success:    true,
-		StatusCode: http.StatusCreated,
-		Message:    "Registration successful : New User has been created",
-		Data:       registerOutput,
+	var listCategories []string
+
+	response := &m.NewResponseUserDetail{
+		Message:        "Get user : Certain user detail has been shown",
+		Success:        true,
+		StatusCode:     http.StatusOK,
+		ResponseUsers:  output,
+		ListCategories: listCategories,
 	}
 
-	c.JSON(http.StatusCreated, response)
+	c.JSON(http.StatusOK, response)
 }
 
 func randToken(length int) string {
