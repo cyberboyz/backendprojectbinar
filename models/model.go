@@ -195,10 +195,11 @@ type ResponsePostUpdate struct {
 
 type ResponseDetailPost struct {
 	*PostsUsersJoin
-	EditMode   bool   `json:"edit_mode"`
-	Message    string `json:"message"`
-	Success    bool   `json:"success"`
-	StatusCode int    `json:"status_code"`
+	EditMode     bool   `json:"edit_mode"`
+	IsBookmarked bool   `json:"is_bookmarked"`
+	Message      string `json:"message"`
+	Success      bool   `json:"success"`
+	StatusCode   int    `json:"status_code"`
 }
 
 type ResponseCategory struct {

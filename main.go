@@ -107,9 +107,9 @@ func main() {
 				owncategory.PUT("/", UpdateCategoriesByUser).Use(AuthorizeMiddleware)
 				owncategory.DELETE("/", DeleteCategoriesByUser).Use(AuthorizeMiddleware)
 			}
-			logged_in.POST("/addowncategories", AddCategoriesByUser).Use(AuthorizeMiddleware)
-			logged_in.PUT("/updateowncategories", UpdateCategoriesByUser).Use(AuthorizeMiddleware)
-			logged_in.DELETE("/deleteowncategories", DeleteCategoriesByUser).Use(AuthorizeMiddleware)
+			// logged_in.POST("/addowncategories", AddCategoriesByUser).Use(AuthorizeMiddleware)
+			// logged_in.PUT("/updateowncategories", UpdateCategoriesByUser).Use(AuthorizeMiddleware)
+			// logged_in.DELETE("/deleteowncategories", DeleteCategoriesByUser).Use(AuthorizeMiddleware)
 			logged_in.GET("/ownposts", ShowOwnPosts).Use(AuthorizeMiddleware)
 		}
 	}
@@ -826,9 +826,22 @@ func PostDetail(c *gin.Context) {
 		editMode = true
 	}
 
+	var bookmark_id int
+	// var id_user uint
+	// db.Raw("SELECT id from users where email = ?", login.Email).Row().Scan(&id_user)
+
+	db.Raw("SELECT id FROM bookmarks WHERE bookmarks.id_user = ? AND bookmarks.id_post = ?", auth.ID, id).Row().Scan(&bookmark_id)
+
+	isBookmarked := false
+
+	if bookmark_id != 0 {
+		isBookmarked = true
+	}
+
 	response := &m.ResponseDetailPost{
 		post,
 		editMode,
+		isBookmarked,
 		"Post has been obtained",
 		true,
 		200,
@@ -913,7 +926,7 @@ func PostUpdate(c *gin.Context) {
 		return
 	}
 
-	post := &m.Posts{}
+	post := &m.PostsUsersJoin{}
 	err = c.Bind(post)
 	if err != nil {
 		response := &m.ResponsePost{
@@ -991,19 +1004,22 @@ func PostUpdate(c *gin.Context) {
 	if auth.ID == postusers.IDUser {
 		editMode = true
 	}
-	if err != nil {
-		response := &m.ResponsePost{
-			Message: err.Error(),
-		}
-		c.JSON(http.StatusBadRequest, response)
-		c.Abort()
-		return
+
+	var bookmark_id int
+
+	db.Raw("SELECT id FROM bookmarks WHERE bookmarks.id_user = ? AND bookmarks.id_post = ?", auth.ID, id).Row().Scan(&bookmark_id)
+
+	isBookmarked := false
+
+	if bookmark_id != 0 {
+		isBookmarked = true
 	}
 
 	response := &m.ResponseDetailPost{
-		postusers,
+		post,
 		editMode,
-		"Post has been updated",
+		isBookmarked,
+		"Post has been obtained",
 		true,
 		200,
 	}
