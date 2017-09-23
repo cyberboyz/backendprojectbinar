@@ -103,9 +103,9 @@ func main() {
 			}
 			owncategory := logged_in.Group("/owncategory")
 			{
-				owncategory.POST("/addowncategories", AddCategoriesByUser).Use(AuthorizeMiddleware)
-				owncategory.PUT("/updateowncategories", UpdateCategoriesByUser).Use(AuthorizeMiddleware)
-				owncategory.DELETE("/deleteowncategories", DeleteCategoriesByUser).Use(AuthorizeMiddleware)
+				owncategory.POST("/", AddCategoriesByUser).Use(AuthorizeMiddleware)
+				owncategory.PUT("/", UpdateCategoriesByUser).Use(AuthorizeMiddleware)
+				owncategory.DELETE("/", DeleteCategoriesByUser).Use(AuthorizeMiddleware)
 			}
 			logged_in.POST("/addowncategories", AddCategoriesByUser).Use(AuthorizeMiddleware)
 			logged_in.PUT("/updateowncategories", UpdateCategoriesByUser).Use(AuthorizeMiddleware)
