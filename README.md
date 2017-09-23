@@ -113,16 +113,33 @@ Operasi CRUD (create, read, update, dan delete) pada tabel posts, users, bookmar
 # Testing URL
 Untuk menguji URL dengan Postman / cURL
 
-| Name                | URL                                | HTTP Method  |
-| --------------------|:----------------------------------:|:------------:|
-| Register User       | `<your_url>/v1/register`           |   **POST**   |
-| Login User          | `<your_url>/v1/login`              |   **POST**   |
-| Logout User         | `<your_url>/v1/logout`             |   **GET**    |
-| Get All Post        | `<your_url>/v1/posts`              |   **GET**    |
-| Get Post Detail     | `<your_url>/v1/posts/<id_post>`    |   **GET**    |
-| Update Post         | `<your_url>/v1/posts/<id_post>`    |   **PUT**    |
-| Delete Post         | `<your_url>/v1/posts/<id_post>`    |   **DELETE** |
+| Name                  | URL                                | HTTP Method  |
+| ----------------------|:----------------------------------:|:------------:|
+| Register User         | `<your_url>/v1/register`           |   **POST**   |
+| Login User            | `<your_url>/v1/login`              |   **POST**   |
+| Logout User           | `<your_url>/v1/logout`             |   **GET**    |
+| Get All Post          | `<your_url>/v1/posts`              |   **GET**    |
+| Get Post Detail       | `<your_url>/v1/posts/<id_post>`    |   **GET**    |
+| Update Post           | `<your_url>/v1/posts/<id_post>`    |   **PUT**    |
+| Delete Post           | `<your_url>/v1/posts/<id_post>`    |   **DELETE** |
+| Show All Users        | `<your_url>/v1/profile`            |   **GET**    |
+| Show Profile Detail   | `<your_url>/v1/profile/<id_user>`  |   **GET**    |
+| Update Profile Detail | `<your_url>/v1/profile/<id_user>`  |   **PUT**    |
+| Delete Profile        | `<your_url>/v1/profile/<id_user>`  |   **DELETE** |
+| Add Category          | `<your_url>/v1/categories`         |   **POST**   |
+| Show All Categories   | `<your_url>/v1/categories`         |   **GET**    |
+| Show All Posts Based  | `<your_url>/v1/categories`         |   **GET**    |
+| on Categories         |                                    |              |
+
 
 # Programmer
 - Fattah fattahazzuhry@gmail.com
 - Riska rizkawidarsono29@gmail.com
+
+# Library yang Digunakan
+- Gin
+- BCrypt
+
+# Credits
+- Binar Academy <3
+- Mentor Backend Binar Academy Batch #3 : mas Prima, mas Gean, mas Andi, mas Estu
