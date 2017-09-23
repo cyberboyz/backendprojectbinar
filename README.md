@@ -109,3 +109,20 @@ Autentikasi sign up dilakukan dengan memasukkan input request yang berupa nama, 
 Operasi CRUD (create, read, update, dan delete) pada tabel posts, users, bookmarks, categories, dan comments dilakukan dengan menggunakan token yang didapatkan saat login. Token tersebut dimasukkan ke header bagian Authorization.
 
 ** File blueprint API : apiary.apib **
+
+# Testing URL
+Untuk menguji URL dengan Postman / cURL
+
+| Name                | URL                                | HTTP Method  |
+| --------------------|:----------------------------------:|:------------:|
+| Register User       | `<your_url>/v1/register`           |   **POST**   |
+| Login User          | `<your_url>/v1/login`              |   **POST**   |
+| Logout User         | `<your_url>/v1/logout`             |   **GET**    |
+| Get All Post        | `<your_url>/v1/posts`              |   **GET**    |
+| Get Post Detail     | `<your_url>/v1/posts/<id_post>`    |   **GET**    |
+| Update Post         | `<your_url>/v1/posts/<id_post>`    |   **PUT**    |
+| Delete Post         | `<your_url>/v1/posts/<id_post>`    |   **DELETE** |
+
+# Programmer
+- Fattah fattahazzuhry@gmail.com
+- Riska rizkawidarsono29@gmail.com
