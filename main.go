@@ -67,13 +67,13 @@ func main() {
 			post := logged_in.Group("/posts")
 			{
 				// comment := post.Group("/comments")
-				// 	{
-				// 		comment.GET("/", CommentGet)
-				// 		comment.GET("/:id", CommentDetail)
-				// 		comment.POST("/", CommentCreate).Use(AuthorizeMiddleware)
-				// 		comment.PUT("/:id", CommentUpdate).Use(AuthorizeMiddleware)
-				// 		comment.DELETE("/:id", CommentDelete).Use(AuthorizeMiddleware)
-				// 	}
+				// {
+				// 	// comment.GET("/", CommentGet)
+				// 	// comment.GET("/:id", CommentDetail)
+				// 	// comment.POST("/", CommentCreate).Use(AuthorizeMiddleware)
+				// 	// comment.PUT("/:id", CommentUpdate).Use(AuthorizeMiddleware)
+				// 	// comment.DELETE("/:id", CommentDelete).Use(AuthorizeMiddleware)
+				// }
 				post.GET("/", PostGet)
 				post.GET("/:id", PostDetail)
 				post.POST("/", PostCreate).Use(AuthorizeMiddleware)
@@ -218,7 +218,6 @@ func RegisterUser(c *gin.Context) {
 
 	output := register.ResponseUsers
 	output.TotalPosts = 0
-	// output.ListCategories = listCategories
 
 	var listCategories []string
 
@@ -448,7 +447,7 @@ func UserUpdate(c *gin.Context) {
 	}
 
 	user := &m.UpdateUsers{}
-	err = c.BindJSON(&user)
+	err = c.Bind(user)
 	if err != nil {
 		response := &m.SuccessStatus{
 			Message: err.Error(),
@@ -562,7 +561,7 @@ func ShowOwnProfile(c *gin.Context) {
 func BookmarkCreate(c *gin.Context) {
 
 	bookmarks := &m.Bookmarks{}
-	err := c.BindJSON(&bookmarks)
+	err := c.Bind(bookmarks)
 	if err != nil {
 		response := &m.ResponseBookmark{
 			Message: err.Error(),
@@ -790,7 +789,8 @@ func PostDetail(c *gin.Context) {
 func PostCreate(c *gin.Context) {
 
 	post := &m.Posts{}
-	err := c.BindJSON(&post)
+
+	err := c.Bind(post)
 	if err != nil {
 		response := &m.ResponsePost{
 			Message: err.Error(),
@@ -842,7 +842,7 @@ func PostUpdate(c *gin.Context) {
 	}
 
 	post := &m.Posts{}
-	err = c.BindJSON(&post)
+	err = c.Bind(post)
 	if err != nil {
 		response := &m.ResponsePost{
 			Message: err.Error(),
@@ -954,7 +954,7 @@ func PostDelete(c *gin.Context) {
 func CategoryCreate(c *gin.Context) {
 
 	category := &m.Categories{}
-	err := c.BindJSON(&category)
+	err := c.Bind(category)
 	if err != nil {
 		response := &m.ResponseCategory{
 			Message: err.Error(),
@@ -1071,7 +1071,7 @@ func UserPostsGet(c *gin.Context) {
 func AddCategoriesByUser(c *gin.Context) {
 
 	inputCategoriesByUser := &m.InputUsersCategories{}
-	err := c.BindJSON(&inputCategoriesByUser)
+	err := c.Bind(inputCategoriesByUser)
 
 	if err != nil {
 		response := &m.ResponseAddCategories{

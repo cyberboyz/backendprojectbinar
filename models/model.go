@@ -42,12 +42,12 @@ type NewResponseUserDetail struct {
 }
 
 type UpdateUsers struct {
-	Email        string `json:"email"`
-	Name         string `json:"name"`
-	Address      string `json:"address"`
-	Bio          string `json:"bio"`
-	IDAvatar     uint   `json:"id_avatar"`
-	IDCoverPhoto uint   `json:"id_cover_photo"`
+	Email        string `json:"email" form:"email"`
+	Name         string `json:"name" form:"name"`
+	Address      string `json:"address" form:"address"`
+	Bio          string `json:"bio" form:"bio"`
+	IDAvatar     uint   `json:"id_avatar" form:"id_avatar"`
+	IDCoverPhoto uint   `json:"id_cover_photo" form:"id_cover_photo"`
 }
 
 type UpdatePosts struct {
@@ -87,8 +87,8 @@ type Login struct {
 }
 
 type Categories struct {
-	Categories   string `gorm:"primary_key" json:"categories"`
-	IDBackground uint   `json:"id_background"`
+	Categories   string `gorm:"primary_key" json:"categories" form:"categories"`
+	IDBackground uint   `json:"id_background" form:"id_background"`
 }
 
 type UsersCategories struct {
@@ -99,17 +99,17 @@ type UsersCategories struct {
 
 type InputUsersCategories struct {
 	ID         uint     `gorm:"primary_key" json:"id"`
-	IDUser     uint     `json:"id_user, omitempty"`
-	Categories []string `json:"categories"`
+	IDUser     uint     `form:"id_user" json:"id_user, omitempty"`
+	Categories []string `form:"categories" json:"categories"`
 }
 
 type Posts struct {
-	ID           uint      `gorm:"primary_key" json:"id_post"`
-	IDUser       uint      `json:"id_user, omitempty"`
-	IDBackground uint      `json:"id_background, omitempty"`
-	PostTitle    string    `json:"post_title, omitempty"`
-	Categories   string    `json:"categories, omitempty"`
-	Content      string    `json:"content, omitempty"`
+	ID           uint      `gorm:"primary_key" form:"id_post" json:"id_post"`
+	IDUser       uint      `form:"id_user" json:"id_user, omitempty"`
+	IDBackground uint      `form:"id_background" json:"id_background, omitempty"`
+	PostTitle    string    `form:"post_title" json:"post_title, omitempty"`
+	Categories   string    `form:"categories" json:"categories, omitempty"`
+	Content      string    `form:"content" json:"content, omitempty"`
 	CreatedAt    time.Time `json:"published_at, omitempty"`
 	UpdatedAt    time.Time `json:"updated_at, omitempty"`
 }
@@ -121,8 +121,8 @@ type PostsUsersJoin struct {
 
 type Bookmarks struct {
 	ID        uint      `gorm:"primary_key" json:"id_bookmark"`
-	IDUser    uint      `json:"id_user"`
-	IDPost    uint      `json:"id_post"`
+	IDUser    uint      `json:"id_user" form:"id_user"`
+	IDPost    uint      `json:"id_post" form:"id_post"`
 	CreatedAt time.Time `json:"published_at"`
 }
 
