@@ -241,8 +241,8 @@ func randToken(length int) string {
 func LoginUser(c *gin.Context) {
 	login := &m.Users{}
 
-	err := c.Bind(login)
-	c.BindJSON(login)
+	c.Bind(login)
+	// c.BindJSON(login)
 
 	// fmt.Println(login.Password)
 
