@@ -66,19 +66,19 @@ func main() {
 			logged_in.GET("/ownprofile", ShowOwnProfile)
 			post := logged_in.Group("/posts")
 			{
+				// comment := post.Group("/comments")
+				// 	{
+				// 		comment.GET("/", CommentGet)
+				// 		comment.GET("/:id", CommentDetail)
+				// 		comment.POST("/", CommentCreate).Use(AuthorizeMiddleware)
+				// 		comment.PUT("/:id", CommentUpdate).Use(AuthorizeMiddleware)
+				// 		comment.DELETE("/:id", CommentDelete).Use(AuthorizeMiddleware)
+				// 	}
 				post.GET("/", PostGet)
 				post.GET("/:id", PostDetail)
 				post.POST("/", PostCreate).Use(AuthorizeMiddleware)
 				post.PUT("/:id", PostUpdate).Use(AuthorizeMiddleware)
 				post.DELETE("/:id", PostDelete).Use(AuthorizeMiddleware)
-				// comment := post.Group("/comments")
-				// {
-				// 	comment.GET("/", CommentGet)
-				// 	comment.GET("/:id", CommentDetail)
-				// 	comment.POST("/", CommentCreate)
-				// 	comment.PUT("/:id", CommentUpdate)
-				// 	comment.DELETE("/:id", CommentDelete)
-				// }
 			}
 			usergroup := logged_in.Group("/profile")
 			{
@@ -367,14 +367,28 @@ func UserDetail(c *gin.Context) {
 		return
 	}
 
+	var userCategories string
+	categoriesRows, err := db.Raw("SELECT categories from users_categories where id_user = ? GROUP BY categories", id).Rows()
+	defer categoriesRows.Close()
+
+	var listCategories []string
+
+	for categoriesRows.Next() {
+		categoriesRows.Scan(&userCategories)
+		fmt.Println(userCategories)
+		listCategories = append(listCategories, userCategories)
+	}
+
 	output := user.ResponseUsers
 	output.TotalPosts = total_post
+	// output.ListCategories = listCategories
 
-	response := &m.ResponseUserDetail{
-		Message:       "Get user : Certain user detail has been shown",
-		Success:       true,
-		StatusCode:    http.StatusOK,
-		ResponseUsers: output,
+	response := &m.NewResponseUserDetail{
+		Message:        "Get user : Certain user detail has been shown",
+		Success:        true,
+		StatusCode:     http.StatusOK,
+		ResponseUsers:  output,
+		ListCategories: listCategories,
 	}
 
 	c.JSON(http.StatusOK, response)
@@ -478,17 +492,32 @@ func ShowOwnProfile(c *gin.Context) {
 		return
 	}
 
+	var userCategories string
+	categoriesRows, _ := db.Raw("SELECT categories from users_categories where id_user = ? GROUP BY categories", auth.ID).Rows()
+	defer categoriesRows.Close()
+
+	var listCategories []string
+
+	for categoriesRows.Next() {
+		categoriesRows.Scan(&userCategories)
+		fmt.Println(userCategories)
+		listCategories = append(listCategories, userCategories)
+	}
+
 	output := user.ResponseUsers
 	output.TotalPosts = total_post
+	// output.ListCategories = listCategories
 
-	response := &m.ResponseUser{
-		Message:    "Get user : Certain user detail has been shown",
-		Success:    true,
-		StatusCode: http.StatusOK,
-		Users:      output,
+	response := &m.NewResponseUserDetail{
+		Message:        "Get user : Certain user detail has been shown",
+		Success:        true,
+		StatusCode:     http.StatusOK,
+		ResponseUsers:  output,
+		ListCategories: listCategories,
 	}
 
 	c.JSON(http.StatusOK, response)
+
 }
 
 func BookmarkCreate(c *gin.Context) {
@@ -631,7 +660,9 @@ func BookmarkDelete(c *gin.Context) {
 	auth := &m.Users{}
 	db.Where("token = ? ", authorization).Find(&auth)
 
-	checkDeleteBookmark := db.Where("id = ? AND id_user = ?", id, auth.ID).Delete(&m.Bookmarks{}).RowsAffected
+	checkDeleteBookmark := db.Where("id_post = ? AND id_user = ?", id, auth.ID).Delete(m.Bookmarks{}).RowsAffected
+	fmt.Println(id)
+	fmt.Println(auth.ID)
 
 	if checkDeleteBookmark == 0 {
 		response := &m.ResponseBookmark{
@@ -1017,20 +1048,17 @@ func AddCategoriesByUser(c *gin.Context) {
 	err = db.Where("token = ? ", authorization).Find(&auth).Error
 
 	inputCategoriesByUser.IDUser = auth.ID
-	// var id_user string
+	// var categoryString string
 
 	for _, element := range inputCategoriesByUser.Categories {
 		categoriesByUser := &m.UsersCategories{}
 		categoriesByUser.IDUser = auth.ID
 		fmt.Println(categoriesByUser.IDUser)
 		fmt.Println(element)
-		checkExist := db.Table("users_categories").Where("id_user = ? AND categories = ? ", categoriesByUser.IDUser, element).Select("id_user").RowsAffected
+		// db.Table("users_categories").Where("id_user = ? AND categories = ? ", categoriesByUser.IDUser, element).Select("categories").Scan(&categoryString)
 
 		categoriesByUser.Categories = element
-		fmt.Println(checkExist)
-		if checkExist == 0 {
-			db.Save(&categoriesByUser)
-		}
+		db.Save(&categoriesByUser)
 	}
 
 	response := &m.ResponseAddCategories{

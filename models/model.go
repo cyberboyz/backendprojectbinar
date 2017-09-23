@@ -33,6 +33,14 @@ type ResponseUsers struct {
 	UpdatedAt    time.Time `json:"updated_at"`
 }
 
+type NewResponseUserDetail struct {
+	ResponseUsers
+	Message        string   `json:"message"`
+	ListCategories []string `json:"categories"`
+	Success        bool     `json:"success"`
+	StatusCode     int      `json:"status_code"`
+}
+
 type UpdateUsers struct {
 	Email        string `json:"email"`
 	Name         string `json:"name"`
