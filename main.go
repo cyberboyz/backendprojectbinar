@@ -71,7 +71,7 @@ func main() {
 				// {
 				// 	// comment.GET("/", CommentGet)
 				// 	// comment.GET("/:id", CommentDetail)
-				// 	// comment.POST("/", CommentCreate).Use(AuthorizeMiddleware)
+				// 	comment.POST("/", CommentCreate).Use(AuthorizeMiddleware)
 				// 	// comment.PUT("/:id", CommentUpdate).Use(AuthorizeMiddleware)
 				// 	// comment.DELETE("/:id", CommentDelete).Use(AuthorizeMiddleware)
 				// }
@@ -551,6 +551,26 @@ func ShowOwnProfile(c *gin.Context) {
 	authorization = strings.TrimPrefix(authorization, "Bearer ")
 	auth := &m.Users{}
 	err = db.Where("token = ? ", authorization).Find(&auth).Error
+
+	if authorization == "" {
+		response := &m.ResponseUser{
+			Message: "Cannot access the resource : You need to authenticate",
+		}
+		c.JSON(http.StatusUnauthorized, response)
+		c.Abort()
+		return
+	}
+
+	err = db.Where("token = ? ", authorization).Find(&auth).Error
+
+	if err != nil {
+		response := &m.ResponseUser{
+			Message: "Unauthorized access",
+		}
+		c.JSON(http.StatusUnauthorized, response)
+		c.Abort()
+		return
+	}
 
 	user := &m.Users{}
 	err = db.Where("id = ?", auth.ID).First(&user).Error
@@ -1395,4 +1415,66 @@ func SeveralCategoriesPostsList(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, response)
+}
+
+func CommentCreate(c *gin.Context) {
+
+	post := &m.Posts{}
+
+	err := c.Bind(post)
+	if err != nil {
+		response := &m.ResponsePost{
+			Message: err.Error(),
+		}
+		c.JSON(http.StatusBadRequest, response)
+		c.Abort()
+		return
+	}
+
+	authorization := c.Request.Header.Get("Authorization")
+	authorization = strings.TrimPrefix(authorization, "Bearer ")
+
+	auth := &m.Users{}
+
+	if authorization == "" {
+		response := &m.ResponseUser{
+			Message: "Cannot access the resource : You need to authenticate",
+		}
+		c.JSON(http.StatusUnauthorized, response)
+		c.Abort()
+		return
+	}
+
+	err = db.Where("token = ? ", authorization).Find(&auth).Error
+
+	if err != nil {
+		response := &m.ResponseUser{
+			Message: "Unauthorized access",
+		}
+		c.JSON(http.StatusUnauthorized, response)
+		c.Abort()
+		return
+	}
+
+	post.IDUser = auth.ID
+
+	err = db.Create(post).Error
+
+	if err != nil {
+		response := &m.ResponsePost{
+			Message: err.Error(),
+		}
+		c.JSON(http.StatusBadRequest, response)
+		c.Abort()
+		return
+	}
+
+	response := &m.ResponsePost{
+		post,
+		"Post has been created",
+		true,
+		200,
+	}
+
+	c.JSON(http.StatusCreated, response)
 }
