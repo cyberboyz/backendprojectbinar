@@ -144,7 +144,7 @@ func ValidateFormatEmail(email string) string {
 func RegisterUser(c *gin.Context) {
 	register := &m.Users{}
 
-	err := c.BindJSON(&register)
+	err := c.Bind(register)
 	if err != nil {
 		response := &m.ResponseAuth{
 			Message: err.Error(),
@@ -237,7 +237,7 @@ func randToken(length int) string {
 func LoginUser(c *gin.Context) {
 	login := &m.Users{}
 
-	err = c.BindJSON(&login)
+	err = c.Bind(login)
 	inputPassword := login.Password
 	login.Email = strings.ToLower(login.Email)
 
