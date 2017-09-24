@@ -2,6 +2,8 @@
 
 Repository ini digunakan untuk membuat kode backend dari aplikasi Dreamcatcher yang digunakan pada project Binar Batch 3 di Tim C. Pada kode ini terdapat API untuk melakukan autentikasi (sign up, login, dan logout) dan operasi CRUD yang hanya pada tabel posts, users, categories, bookmarks dan comments yang digunakan oleh tim Front End (Android & iOS) untuk menampilkan data di sisi client. 
 
+[![license](https://img.shields.io/github/license/mashape/apistatus.svg)]()
+
 ## Instalasi
 
 Install Golang terlebih dahulu kemudian setting $GOPATH. Adapun petunjuk untuk instalasi Golang dan setting $GOPATH bisa dilihat di https://golang.org/doc/install.
@@ -60,43 +62,34 @@ Setelah berhasil di-deploy ke Heroku, jalankan perintah ```heroku open``` untuk 
 
 ## Pengujian dengan Postman
 
-Untuk pengujian melalui Postman dilakukan dengan menggunakan <nama_URL_heroku>/v1/<nama_resource>. Adapun list dari resource yang dapat diakses adalah :
-```
-Authentication
-POST /v1/register
-POST /v1/login
-POST /v1/logout
+Untuk pengujian melalui Postman dilakukan dengan menggunakan <your_url>/v1/<nama_resource>. Adapun list dari resource yang dapat diakses adalah :
 
-Posts
-POST /v1/posts
-GET /v1/posts
-GET /v1/posts/{id_post}
-PUT /v1/posts/{id_post}
-DELETE /v1/posts/{id_post}
-
-Categories
-GET /v1/categories
-GET /v1/categories/showposts
-
-Profile
-GET /v1/profile
-PUT /v1/profile
-PATCH /v1/profile
-GET /v1/profile/posts
-POST /v1/profile/categories
-
-Bookmarks
-POST /v1/bookmarks
-GET /v1/bookmarks
-DELETE /v1/bookmarks/{id_bookmark}
-
-Comments
-POST /v1/posts/{id_post}/comments
-GET /v1/posts/{id_post}/comments
-GET /v1/posts/{id_post}/comments/{id_comment}
-PUT /v1/posts/{id_post}/comments/{id_comment}
-DELETE /v1/posts/{id_post}/comments/{id_comment}
-```
+| Name                  | URL                                | HTTP Method  |
+| ----------------------|:----------------------------------:|:------------:|
+| Register User         | `<your_url>/v1/register`           |   **POST**   |
+| Login User            | `<your_url>/v1/login`              |   **POST**   |
+| Logout User           | `<your_url>/v1/logout`             |   **GET**    |
+| Get All Post          | `<your_url>/v1/posts`              |   **GET**    |
+| Get Post Detail       | `<your_url>/v1/posts/<id_post>`    |   **GET**    |
+| Update Post           | `<your_url>/v1/posts/<id_post>`    |   **PUT**    |
+| Delete Post           | `<your_url>/v1/posts/<id_post>`    |   **DELETE** |
+| Show All Users        | `<your_url>/v1/profile`            |   **GET**    |
+| Show Profile Detail   | `<your_url>/v1/profile/<id_user>`  |   **GET**    |
+| Update Profile Detail | `<your_url>/v1/profile/<id_user>`  |   **PUT**    |
+| Delete Profile        | `<your_url>/v1/profile/<id_user>`  |   **DELETE** |
+| Add Category          | `<your_url>/v1/categories`         |   **POST**   |
+| Show All Categories   | `<your_url>/v1/categories`         |   **GET**    |
+| Show All Posts Based on Categories | `<your_url>/v1/categories`         |   **GET**    |
+| Show All Posts Based on Several Categories| `<your_url>/v1/3categoriesposts` |   **POST** |
+| Add Bookmark          | `<your_url>/v1/bookmarks`          |   **POST**   |
+| Delete Bookmark       | `<your_url>/v1/bookmarks/<id_post>`|   **DELETE** |
+| Show Own Bookmarks    | `<your_url>/v1/bookmarks`          |   **GET**    |
+| Show Own Profile      | `<your_url>/v1/ownprofile`         |   **GET**    |
+| Show Own Posts        | `<your_url>/v1/ownposts`           |   **GET**    |
+| Add Categories by User| `<your_url>/v1/owncategory`        |   **POST**   |
+| Update Categories by User| `<your_url>/v1/owncategory`     |   **PUT**    |
+| Delete Categories by User| `<your_url>/v1/owncategory`     |   **DELETE** |
+| Get All Posts Based on User| `<your_url>/v1/profile/<id_user>/posts` |   **GET** |
 
 # Penjelasan Aplikasi
 
@@ -109,3 +102,15 @@ Autentikasi sign up dilakukan dengan memasukkan input request yang berupa nama, 
 Operasi CRUD (create, read, update, dan delete) pada tabel posts, users, bookmarks, categories, dan comments dilakukan dengan menggunakan token yang didapatkan saat login. Token tersebut dimasukkan ke header bagian Authorization.
 
 ** File blueprint API : apiary.apib **
+
+# Programmer
+- Fattah fattahazzuhry@gmail.com
+- Riska rizkawidarsono29@gmail.com
+
+# Library yang Digunakan
+- Gin
+- BCrypt
+
+# Credits
+- Binar Academy <3
+- Mentor Backend Binar Academy Batch #3 : mas Prima, mas Gean, mas Andi, mas Estu
