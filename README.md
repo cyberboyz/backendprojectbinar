@@ -8,20 +8,21 @@ Repository ini digunakan untuk membuat kode backend dari aplikasi Dreamcatcher y
 
 Install Golang terlebih dahulu kemudian setting $GOPATH. Adapun petunjuk untuk instalasi Golang dan setting $GOPATH bisa dilihat di https://golang.org/doc/install.
 
-Jalankan perintah ini di command line Linux/Unix:
+![Peek recording itself](https://github.com/cyberboyz/backendprojectbinar/blob/master/asset/runningdreamcatcher.gif)
+
+Jalankan perintah go get :
 ```
-cd $GOPATH/src
+go get github.com/cyberboyz/backendprojectbinar
+```
+
+Kemudian masuk directory dengan ketik di command line Linux/Unix:
+```
+cd $GOPATH/src/github.com/cyberboyz/backendprojectbinar
 ```
 
 Atau pada Windows:
 ```
-cd %GOPATH%/src
-```
-
-Kemudian ketikkan perintah ini pada Windows/Linux/Unix untuk membuat folder baru tempat menaruh project:
-```
-mkdir dreamcatchertimche
-cd dreamcatchertimche
+cd %GOPATH%\src\github.com\cyberboyz\backendprojectbinar
 ```
 
 Setelah itu, download seluruh dependency untuk kode yang digunakan dengan menggunakan godeps. Masukkan perintah ````go get -u github.com/tools/godep```` untuk instalasi/update godep. Supaya godep dapat menentukan, menyimpan, dan menulis ulang dependency dari aplikasi yang digunakan, masuk ke direktori aplikasi yang berada di ````$GOPATH/src/dreamcatchertimche```` dan jalankan perintah ini di command line:
