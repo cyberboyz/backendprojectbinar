@@ -8,7 +8,7 @@ Repository ini digunakan untuk membuat kode backend dari aplikasi Dreamcatcher y
 
 Install Golang terlebih dahulu kemudian setting $GOPATH. Adapun petunjuk untuk instalasi Golang dan setting $GOPATH bisa dilihat di https://golang.org/doc/install.
 
-![Peek recording itself](https://github.com/cyberboyz/backendprojectbinar/blob/master/asset/runningdreamcatcher.gif)
+<p align="center">![Peek recording itself](https://github.com/cyberboyz/backendprojectbinar/blob/master/asset/runningdreamcatcher.gif)</p>
 
 Jalankan perintah go get :
 ```
